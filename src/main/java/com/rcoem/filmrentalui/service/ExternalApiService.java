@@ -79,12 +79,12 @@ public class ExternalApiService {
     }
 
 
-    public List<CustomerStoreDTO> getAllStores() {
+    public List<StoreDTO> getAllStores() {
         // Add the projection parameter to the URL!
         String url = this.baseUrl + "stores?projection=storeInfo";
 
         try {
-            CustomerStoreListResponse response = restTemplate.getForObject(url, CustomerStoreListResponse.class);
+            StoreListResponse response = restTemplate.getForObject(url, StoreListResponse.class);
             return response != null && response.getEmbedded() != null ? response.getEmbedded().getStores() : null;
         } catch (Exception e) {
             System.err.println("Failed to fetch stores: " + e.getMessage());
@@ -92,13 +92,13 @@ public class ExternalApiService {
         }
     }
 
-    public List<CustomerAddressDTO> getAllAddresses() {
+    public List<AddressDTO> getAllAddresses() {
         // Use a placeholder {size} in the URL
         String url = this.baseUrl + "addresses?size={size}";
 
         try {
-            // Pass the integer 1000 as the final argument to safely replace the {size} placeholder
-            CustomerAddressListResponse response = restTemplate.getForObject(url, CustomerAddressListResponse.class, 1000);
+            // Pass the integer 10 as the final argument to safely replace the {size} placeholder
+            AddressListResponse response = restTemplate.getForObject(url, AddressListResponse.class, 10);
 
             return response != null && response.getEmbedded() != null ? response.getEmbedded().getAddresses() : null;
         } catch (Exception e) {

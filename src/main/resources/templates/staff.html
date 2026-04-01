@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Staff Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+
+<h2 class="mb-4">Staff Directory</h2>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <form th:action="@{/aditya/staff/search}" method="get" class="d-flex gap-2">
+            <input type="text" name="searchTerm" class="form-control"
+                   placeholder="Search name, email, or username..." th:value="${currentSearch}">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </div>
+    <div class="col-md-6 text-end">
+        <div class="btn-group">
+            <a th:href="@{/aditya/staff(active=true)}" class="btn btn-outline-success btn-sm">Active</a>
+            <a th:href="@{/aditya/staff(active=false)}" class="btn btn-outline-danger btn-sm">Inactive</a>
+            <a th:href="@{/aditya/staff}" class="btn btn-outline-secondary btn-sm">All</a>
+        </div>
+    </div>
+    <div class="mb-3">
+        <a th:href="@{/aditya/staff/add}" class="btn btn-success">+ Add New Staff</a>
+    </div>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead class="table-dark">
+    <tr>
+        <th>Username</th>
+        <th>Full Name</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="staff : ${staffResponse.embedded.staffs}">
+        <td class="fw-bold" th:text="${staff.username}">Username</td>
+        <td th:text="${staff.firstName + ' ' + staff.lastName}">Name</td>
+        <td th:text="${staff.email}">Email</td>
+        <td>
+                <span th:class="${staff.active} ? 'badge bg-success' : 'badge bg-danger'"
+                      th:text="${staff.active} ? 'Active' : 'Inactive'">
+                </span>
+        </td>
+        <td>
+            <div class="btn-group">
+                <a th:href="@{/aditya/staff/payments(username=${staff.username})}" class="btn btn-sm btn-info text-white">View Payments</a>
+
+                <a th:href="@{/aditya/staff/edit/{id}(id=${staff.staffId})}" class="btn btn-sm btn-warning">Edit</a>
+
+                <a th:href="@{/aditya/staff/delete/{id}(id=${staff.staffId})}"
+                   class="btn btn-sm btn-danger"
+                   onclick="return confirm('Are you sure?')">De active</a>
+            </div>
+        </td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(staffResponse.embedded.staffs)}">
+        <td colspan="5" class="text-center text-muted">No staff members found.</td>
+    </tr>
+    </tbody>
+</table>
+
+<nav th:if="${staffResponse.page != null and staffResponse.page.totalPages > 1}">
+    <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${staffResponse.page.number == 0} ? 'disabled'">
+            <a class="page-link" th:href="@{/aditya/staff(page=${staffResponse.page.number - 1}, searchTerm=${currentSearch}, active=${currentActive})}">Previous</a>
+        </li>
+
+        <li class="page-item disabled">
+                <span class="page-link">
+                    Page <span th:text="${staffResponse.page.number + 1}"></span> of <span th:text="${staffResponse.page.totalPages}"></span>
+                </span>
+        </li>
+
+        <li class="page-item" th:classappend="${staffResponse.page.number + 1 >= staffResponse.page.totalPages} ? 'disabled'">
+            <a class="page-link" th:href="@{/aditya/staff(page=${staffResponse.page.number + 1}, searchTerm=${currentSearch}, active=${currentActive})}">Next</a>
+        </li>
+    </ul>
+</nav>
+
+</body>
+</html>

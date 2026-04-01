@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CustomerStoreListResponse {
+public class StoreListResponse {
 
     @JsonProperty("_embedded")
     private EmbeddedData embedded;
@@ -18,7 +18,7 @@ public class CustomerStoreListResponse {
         this.embedded = embedded;
     }
 
-    public List<CustomerStoreDTO> getStores() {
+    public List<StoreDTO> getStores() {
         return embedded != null ? embedded.getStores() : List.of();
     }
 
@@ -26,13 +26,13 @@ public class CustomerStoreListResponse {
     public static class EmbeddedData {
 
         // This perfectly matches the "stores" array in your JSON
-        private List<CustomerStoreDTO> stores;
+        private List<StoreDTO> stores;
 
-        public List<CustomerStoreDTO> getStores() {
+        public List<StoreDTO> getStores() {
             return stores;
         }
 
-        public void setStores(List<CustomerStoreDTO> stores) {
+        public void setStores(List<StoreDTO> stores) {
             this.stores = stores;
         }
     }

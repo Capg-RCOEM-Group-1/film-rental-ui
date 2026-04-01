@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Staff Management Form</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+
+<div class="card shadow">
+    <div class="card-header bg-dark text-white">
+        <h3 class="mb-0" th:text="${staff.staffId == null} ? 'Add New Staff Member' : 'Update Staff Member'">Staff Form</h3>
+    </div>
+    <div class="card-body">
+        <form th:action="@{/aditya/staff/save}" th:object="${staff}" method="post">
+            <input type="hidden" th:field="*{staffId}">
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">First Name *</label>
+                    <input type="text" th:field="*{firstName}" class="form-control"
+                           placeholder="Enter first name" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Last Name *</label>
+                    <input type="text" th:field="*{lastName}" class="form-control"
+                           placeholder="Enter last name" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Username *</label>
+                    <input type="text" th:field="*{username}" class="form-control"
+                           placeholder="Choose a username" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" th:field="*{email}" class="form-control"
+                           placeholder="email@example.com">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Password *</label>
+                    <input type="password"
+                           th:field="*{password}"
+                           class="form-control"
+                           th:required="${staff.staffId == null}"
+                           placeholder="Enter secure password">
+
+                    <small class="text-muted" th:if="${staff.staffId != null}">
+                        Leave blank to keep current password
+                    </small>
+
+                    <small class="text-primary" th:if="${staff.staffId == null}">
+                        Password is required for new accounts.
+                    </small>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Account Status *</label>
+                    <select th:field="*{active}" class="form-select" required>
+                        <option th:value="true">Active</option>
+                        <option th:value="false">Inactive</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="mb-3" th:if="${staff.staffId == null}">
+                <label class="form-label fw-bold">Assigned Store *</label>
+                <select th:field="*{store}" class="form-select" required>
+                    <option value="">-- Select a Store --</option>
+                    <option th:each="s : ${stores}"
+                            th:value="${s.storeId}"
+                            th:text="${'Store #' + s.storeId + ' - ' + s.city}"></option>
+                </select>
+            </div>
+
+            <div class="mb-4" th:if="${staff.staffId == null}">
+                <label class="form-label fw-bold">Residential Address *</label>
+                <select th:field="*{address}" class="form-select" required>
+                    <option value="">-- Select an Address --</option>
+                    <option th:each="a : ${addresses}"
+                            th:value="${a.addressId}"
+                            th:text="${a.fullDisplay}"></option>
+                </select>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a th:href="@{/aditya/staff}" class="btn btn-outline-secondary">Back to List</a>
+                <button type="submit" class="btn btn-primary px-5">Save Staff Information</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
