@@ -134,6 +134,21 @@ public class ExternalApiService {
         restTemplate.exchange(this.baseUrl + "customers/" + customerId, org.springframework.http.HttpMethod.PUT, request, String.class);
     }
 
+    public void deleteCustomer(String customerId) {
+        String url = this.baseUrl + "customers/" + customerId;
+        try {
+            restTemplate.delete(url);
+        } catch (Exception e) {
+            System.err.println("Failed to delete customer " + customerId + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public String getCustomerRentalsJson(String customerId, int page, int size) {
+        String url = this.baseUrl + "customer-rentals/search/by-customer?customerId=" + customerId + "&page=" + page + "&size=" + size;
+        return restTemplate.getForObject(url, String.class);
+    }
+
  // ✅ GET ALL FILMS
     public List<FilmDTO> getAllFilms() {
         String url = baseUrl + "/films?projection=filmProjection";

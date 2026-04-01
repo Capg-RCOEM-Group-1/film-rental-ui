@@ -67,6 +67,17 @@
                     Edit Selected
                 </button>
 
+                <button type="button" id="toggleDeleteBtn"
+                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition duration-150 flex-shrink-0">
+                    Delete Customer
+                </button>
+                <button type="submit" id="submitDeleteBtn" form="updateForm" formaction="/ekansh/customers/delete"
+                    formmethod="POST"
+                    class="hidden inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-800 hover:bg-red-900 transition duration-150 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled onclick="return confirm('Are you sure you want to delete the selected customer(s)?');">
+                    Delete Selected
+                </button>
+
                 <a th:if="${currentKeyword != null and !currentKeyword.isEmpty()}" href="/ekansh/customers"
                     class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150">
                     Clear
@@ -103,6 +114,11 @@
                                     class="radio-col hidden px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">
                                     Select</th>
                                 <th scope="col"
+                                    class="checkbox-col hidden px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">
+                                    <input type="checkbox" id="selectAllCb"
+                                        class="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 cursor-pointer">
+                                </th>
+                                <th scope="col"
                                     class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-16">
                                     Sr No</th>
                                 <th scope="col"
@@ -126,6 +142,10 @@
                                 <td class="radio-col hidden px-6 py-4 whitespace-nowrap text-center">
                                     <input type="radio" name="customerId" th:value="${customer.customerId}"
                                         class="customer-radio w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 cursor-pointer">
+                                </td>
+                                <td class="checkbox-col hidden px-6 py-4 whitespace-nowrap text-center">
+                                    <input type="checkbox" name="customerIds" th:value="${customer.customerId}"
+                                        class="customer-checkbox w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 cursor-pointer">
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-semibold text-gray-400"
@@ -157,7 +177,7 @@
                             </tr>
 
                             <tr th:if="${customers == null or customers.isEmpty()}">
-                                <td colspan="6" class="px-6 py-12 text-center">
+                                <td colspan="7" class="px-6 py-12 text-center">
                                     <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24"
                                         stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
@@ -222,25 +242,71 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const toggleBtn = document.getElementById('toggleUpdateBtn');
-            const submitBtn = document.getElementById('submitUpdateBtn');
+            const toggleUpdateBtn = document.getElementById('toggleUpdateBtn');
+            const submitUpdateBtn = document.getElementById('submitUpdateBtn');
             const radCols = document.querySelectorAll('.radio-col');
             const radios = document.querySelectorAll('.customer-radio');
 
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', function () {
+            const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
+            const submitDeleteBtn = document.getElementById('submitDeleteBtn');
+            const checkboxCols = document.querySelectorAll('.checkbox-col');
+            const checkboxes = document.querySelectorAll('.customer-checkbox');
+            const selectAllCb = document.getElementById('selectAllCb');
+
+            if (toggleUpdateBtn) {
+                toggleUpdateBtn.addEventListener('click', function () {
                     radCols.forEach(col => col.classList.toggle('hidden'));
-                    submitBtn.classList.toggle('hidden');
-                    toggleBtn.classList.toggle('bg-yellow-400');
-                    toggleBtn.classList.toggle('bg-gray-200');
+                    submitUpdateBtn.classList.toggle('hidden');
+                    toggleUpdateBtn.classList.toggle('bg-yellow-400');
+                    toggleUpdateBtn.classList.toggle('bg-gray-200');
+
+                    // Close Delete mode if open
+                    if (!submitDeleteBtn.classList.contains('hidden')) {
+                        toggleDeleteBtn.click();
+                    }
+
                     radios.forEach(r => r.checked = false);
-                    submitBtn.disabled = true;
+                    submitUpdateBtn.disabled = true;
                 });
             }
 
             radios.forEach(r => {
                 r.addEventListener('change', function () {
-                    submitBtn.disabled = !document.querySelector('.customer-radio:checked');
+                    submitUpdateBtn.disabled = !document.querySelector('.customer-radio:checked');
+                });
+            });
+
+            if (toggleDeleteBtn) {
+                toggleDeleteBtn.addEventListener('click', function () {
+                    checkboxCols.forEach(col => col.classList.toggle('hidden'));
+                    submitDeleteBtn.classList.toggle('hidden');
+                    toggleDeleteBtn.classList.toggle('bg-red-600');
+                    toggleDeleteBtn.classList.toggle('bg-gray-200');
+
+                    // Close Update mode if open
+                    if (!submitUpdateBtn.classList.contains('hidden')) {
+                        toggleUpdateBtn.click();
+                    }
+
+                    checkboxes.forEach(cb => cb.checked = false);
+                    if (selectAllCb) selectAllCb.checked = false;
+                    submitDeleteBtn.disabled = true;
+                });
+            }
+
+            if (selectAllCb) {
+                selectAllCb.addEventListener('change', function (e) {
+                    checkboxes.forEach(cb => cb.checked = e.target.checked);
+                    submitDeleteBtn.disabled = !document.querySelector('.customer-checkbox:checked');
+                });
+            }
+
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', function () {
+                    submitDeleteBtn.disabled = !document.querySelector('.customer-checkbox:checked');
+                    if (selectAllCb) {
+                        selectAllCb.checked = document.querySelectorAll('.customer-checkbox:checked').length === checkboxes.length && checkboxes.length > 0;
+                    }
                 });
             });
         });
