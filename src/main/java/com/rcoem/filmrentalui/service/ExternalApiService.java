@@ -26,6 +26,45 @@ public class ExternalApiService {
 
     // Write your Backend API CALLS HERE
 
+    // CATEGORY Calls
+
+
+    public CategoryFilmResponse getFilmsByCategory(Byte categoryId, int page, int size) {
+        String url = baseUrl + "/films/search/byCategoryId?categoryId=" + categoryId + "&page=" + page + "&size=" + size;
+        System.out.println("DEBUG: Calling URL: " + url);
+        CategoryFilmResponse response = restTemplate.getForObject(url, CategoryFilmResponse.class);
+        System.out.println("DEBUG: Raw response: " + response);
+        return response;
+    }
+
+    public CategoryResponse getCategories(int page, int size) {
+        String url = baseUrl + "/categories?page=" + page + "&size=" + size;
+        return restTemplate.getForObject(url, CategoryResponse.class);
+    }
+
+    public CategoryResponse searchCategories(String keyword, int page, int size) {
+        String url = baseUrl + "/categories/search/byName?name=" + keyword + "&page=" + page + "&size=" + size;
+        return restTemplate.getForObject(url, CategoryResponse.class);
+    }
+
+    public void createCategory(CategoryDTO category) {
+        String url = baseUrl + "/categories";
+        restTemplate.postForObject(url, category, CategoryDTO.class);
+    }
+
+    public void updateCategory(Byte id, CategoryDTO category) {
+        String url = baseUrl + "/categories/" + id;
+        restTemplate.put(url, category);
+    }
+
+    public void deleteCategory(Byte id) {
+        String url = baseUrl + "/categories/" + id;
+        restTemplate.delete(url);
+    }
+
+
+
+
     // CUSTOMER Calls
 
     public CustomerPageResponse getCustomers(int page, int size) {
@@ -76,7 +115,7 @@ public class ExternalApiService {
         payload.put("lastName", formDTO.getLastName());
         payload.put("email", formDTO.getEmail());
         payload.put("active", 1); // Use 1 for true just in case, or true. Using 1 is safe for tinyint schemas.
-        
+
         // Crucial: Spring Data REST requires exact URIs for relationships, not just IDs!
         payload.put("store", this.baseUrl + "stores/" + formDTO.getStoreId());
         payload.put("address", this.baseUrl + "addresses/" + formDTO.getAddressId());
@@ -98,7 +137,7 @@ public class ExternalApiService {
         check.setFirstName((String) response.get("firstName"));
         check.setLastName((String) response.get("lastName"));
         check.setEmail((String) response.get("email"));
-        
+
         java.util.Map<String, Object> links = (java.util.Map<String, Object>) response.get("_links");
         if (links != null) {
             java.util.Map<String, String> storeLink = (java.util.Map<String, String>) links.get("store");
@@ -123,7 +162,7 @@ public class ExternalApiService {
         payload.put("lastName", formDTO.getLastName());
         payload.put("email", formDTO.getEmail());
         payload.put("active", 1);
-        
+
         payload.put("store", this.baseUrl + "stores/" + formDTO.getStoreId());
         payload.put("address", this.baseUrl + "addresses/" + formDTO.getAddressId());
 
