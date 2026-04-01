@@ -1,5 +1,6 @@
 package com.rcoem.filmrentalui.controllers;
 
+import com.rcoem.filmrentalui.dto.CustomerFormDTO;
 import com.rcoem.filmrentalui.dto.CustomerPageResponse;
 import com.rcoem.filmrentalui.service.ExternalApiService;
 import org.slf4j.Logger;
@@ -7,9 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/ekansh")
@@ -26,7 +26,7 @@ public class EkanshController {
         this.externalApiService = externalApiService;
     }
 
-    @RequestMapping(value = "/customers", method = RequestMethod.GET)
+    @GetMapping("/customers")
     public String customersPage(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "keyword", required = false) String keyword,
@@ -57,5 +57,54 @@ public class EkanshController {
         }
 
         return "customers";
+    }
+
+    @GetMapping("/customers/new")
+    public String showAddCustomerForm(Model model) {
+        model.addAttribute("customerForm", new CustomerFormDTO());
+        model.addAttribute("stores", externalApiService.getAllStores());
+        model.addAttribute("addresses", externalApiService.getAllAddresses());
+        return "add-customer"; // Points to add-customer.html
+    }
+
+    // 2. Process the Submission
+    @PostMapping("/customers")
+    public String processAddCustomer(@ModelAttribute("customerForm") CustomerFormDTO customerForm,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            externalApiService.createCustomer(customerForm);
+            redirectAttributes.addFlashAttribute("successMessage", "Customer successfully created!");
+            return "redirect:/ekansh/customers";
+        } catch (Exception e) {
+            logger.error("Failed to create customer", e);
+            redirectAttributes.addFlashAttribute("error", "Failed to create customer. Ensure backend is running.");
+            return "redirect:/ekansh/customers";
+        }
+    }
+
+    @GetMapping("/customers/edit")
+    public String showEditCustomerForm(@RequestParam("customerId") String customerId, Model model) {
+        CustomerFormDTO customerForm = externalApiService.getCustomerByIdForEdit(customerId);
+        if (customerForm == null) {
+            return "redirect:/ekansh/customers";
+        }
+        model.addAttribute("customerForm", customerForm);
+        model.addAttribute("stores", externalApiService.getAllStores());
+        model.addAttribute("addresses", externalApiService.getAllAddresses());
+        return "update-customer";
+    }
+
+    @PostMapping("/customers/edit")
+    public String processEditCustomer(@ModelAttribute("customerForm") CustomerFormDTO customerForm,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            externalApiService.updateCustomer(customerForm.getCustomerId(), customerForm);
+            redirectAttributes.addFlashAttribute("successMessage", "Customer successfully updated!");
+            return "redirect:/ekansh/customers";
+        } catch (Exception e) {
+            logger.error("Failed to update customer", e);
+            redirectAttributes.addFlashAttribute("error", "Failed to update customer. Ensure backend is running.");
+            return "redirect:/ekansh/customers";
+        }
     }
 }
