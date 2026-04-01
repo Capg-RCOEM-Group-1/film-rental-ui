@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cast Members</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans p-4 sm:p-8">
+
+    <div class="max-w-3xl mx-auto">
+        <!-- Back Button -->
+        <a th:href="@{/films}" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 mb-6 transition">
+            &larr; Back to Film Catalog
+        </a>
+
+        <!-- Header -->
+        <div class="bg-white rounded-t-xl border border-gray-200 p-8 border-b-0 shadow-sm">
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Film Cast</h1>
+            <p class="text-gray-500 mt-2 text-lg">
+                Cast list for: <span class="text-blue-600 font-bold uppercase" th:text="${filmTitle}"></span>
+            </p>
+        </div>
+
+        <!-- Actors Table -->
+        <div class="bg-white shadow-md rounded-b-xl border border-gray-200 overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">Sr No</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actor Name</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-100">
+    <tr th:each="actor, stat : ${actors}" class="hover:bg-blue-50 transition duration-150">
+        <!-- Serial Number -->
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-400" th:text="${stat.count}"></td>
+        
+        <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+                <!-- Avatar Circle with Initial -->
+                <div class="h-8 w-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs mr-3">
+                    <!-- Get the first letter of First Name -->
+                    <span th:if="${actor.firstName != null}" th:text="${#strings.substring(actor.firstName, 0, 1)}"></span>
+                    <span th:unless="${actor.firstName != null}">?</span>
+                </div>
+                
+                <!-- Full Name Display (Combining First and Last) -->
+                <div class="text-sm font-bold text-gray-900 uppercase">
+                    <span th:text="${actor.firstName}"></span> 
+                    <span th:text="${actor.lastName}"></span>
+                </div>
+            </div>
+        </td>
+    </tr>
+
+    <!-- Empty State -->
+    <tr th:if="${#lists.isEmpty(actors)}">
+        <td colspan="2" class="px-6 py-12 text-center text-gray-500 italic">
+            No cast information found for this film.
+        </td>
+    </tr>
+</tbody>
+            </table>
+        </div>
+
+        <!-- Footer Footer -->
+        <div class="mt-4 text-center">
+            <p class="text-xs text-gray-400">Total Actors Found: <span th:text="${#lists.size(actors)}"></span></p>
+        </div>
+    </div>
+    
+</body>
+</html>

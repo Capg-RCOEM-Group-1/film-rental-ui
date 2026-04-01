@@ -277,6 +277,25 @@ public void saveOrUpdateFilm(FilmDTO film, String selectedLanguageId) {
         }
     }
 
+   public List<ActorDTO> getActorsByFilm(Long filmId) {
+    String url = baseUrl + "/films/" + filmId + "/actors?projection=actorProjection";
+    
+    // DEBUG: Print this URL and open it in your browser to check the data
+    System.out.println("Fetching actors from: " + url);
+    
+    try {
+        // We fetch as String first to see the RAW JSON in the console
+        String rawJson = restTemplate.getForObject(url, String.class);
+        System.out.println("RAW JSON FROM BACKEND: " + rawJson);
+
+        ActorResponse response = restTemplate.getForObject(url, ActorResponse.class);
+        return (response != null && response.getEmbedded() != null) ? 
+                response.getEmbedded().getActors() : new java.util.ArrayList<>();
+    } catch (Exception e) {
+        return new java.util.ArrayList<>();
+    }
+}
+
 
 
     //Language Backend End points

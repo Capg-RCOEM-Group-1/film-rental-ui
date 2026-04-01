@@ -1,5 +1,6 @@
 package com.rcoem.filmrentalui.controllers;
 
+import com.rcoem.filmrentalui.dto.ActorDTO;
 import com.rcoem.filmrentalui.dto.FilmDTO;
 import com.rcoem.filmrentalui.dto.FilmResponse;
 import com.rcoem.filmrentalui.dto.LanguageResponse;
@@ -76,4 +77,21 @@ public String saveFilm(@ModelAttribute FilmDTO film, @RequestParam String langua
         apiService.deleteFilm(id);
         return "redirect:/films";
     }
+
+
+    @GetMapping("/actors")
+public String showActors(@RequestParam Long filmId, 
+                         @RequestParam String title, 
+                         Model model) {
+    
+    // 1. Get actors list from service
+    List<ActorDTO> actors = apiService.getActorsByFilm(filmId);
+    
+    // 2. Add to model
+    model.addAttribute("actors", actors);
+    model.addAttribute("filmTitle", title);
+    
+    // 3. Return the new actors page
+    return "film-actors"; 
+}
 }
