@@ -224,4 +224,46 @@ public class ExternalApiService {
    }
 
 
+    public void createLanguage(LanguageFormDTO languageForm) {
+        java.util.Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put("name", languageForm.getName());
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        org.springframework.http.HttpEntity<java.util.Map<String, Object>> request = new org.springframework.http.HttpEntity<>(payload, headers);
+
+        restTemplate.postForObject(this.baseUrl + "languages", request, String.class);
+    }
+
+    public LanguageResponse searchLanguages(String name, int page, int size) {
+        String url = this.baseUrl + "languages/search/findByNameContainingIgnoreCase?name=" + name + "&page=" + page + "&size="+ size;
+        return restTemplate.getForObject(url, LanguageResponse.class);
+    }
+
+    public LanguageFormDTO getLanguageById(Byte id) {
+        String url = this.baseUrl + "languages/" + id;
+        java.util.Map<String, Object> response = restTemplate.getForObject(url, java.util.Map.class);
+        if (response == null) return null;
+
+        LanguageFormDTO check = new LanguageFormDTO();
+        check.setId(id);
+        check.setName((String) response.get("name"));
+
+        return check;
+    }
+
+    public void updateLanguage(Byte id, LanguageFormDTO languageForm) {
+        java.util.Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put("name", languageForm.getName());
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        org.springframework.http.HttpEntity<java.util.Map<String, Object>> request = new org.springframework.http.HttpEntity<>(payload, headers);
+
+        restTemplate.exchange(this.baseUrl + "languages/" + id, org.springframework.http.HttpMethod.PUT, request, String.class);
+    }
+
+    public FilmResponse searchFilms(String name, int page, int size, Byte id, String title) {
+        String url = this.baseUrl + "films/search/findByLanguage_IdAndTitleContainingIgnoreCase?id=" + id + "&page=" + page + "&size="+ size +"&title="+title;
+        return restTemplate.getForObject(url, FilmResponse.class);
+    }
 }
