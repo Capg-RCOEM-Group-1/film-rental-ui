@@ -168,9 +168,11 @@ public class ExternalApiService {
 
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-        org.springframework.http.HttpEntity<java.util.Map<String, Object>> request = new org.springframework.http.HttpEntity<>(payload, headers);
+        org.springframework.http.HttpEntity<java.util.Map<String, Object>> request = new org.springframework.http.HttpEntity<>(
+                payload, headers);
 
-        restTemplate.exchange(this.baseUrl + "customers/" + customerId, org.springframework.http.HttpMethod.PUT, request, String.class);
+        restTemplate.exchange(this.baseUrl + "customers/" + customerId, org.springframework.http.HttpMethod.PUT,
+                request, String.class);
     }
 
     public void deleteCustomer(String customerId) {
@@ -189,26 +191,112 @@ public class ExternalApiService {
     }
 
  // ✅ GET ALL FILMS
-    public List<FilmDTO> getAllFilms() {
-        String url = baseUrl + "/films?projection=filmProjection";
-
-        FilmResponse response =
-                restTemplate.getForObject(url, FilmResponse.class);
-
-        return response.getEmbedded().getFilms();
+    public FilmResponse getAllFilms(String keyword, int page, int size) {
+    String url;
+    if (keyword != null && !keyword.isEmpty()) {
+        url = baseUrl + "/films/search/findByTitleContaining?title=" + keyword 
+            + "&projection=filmProjection&page=" + page + "&size=" + size;
+    } else {
+        url = baseUrl + "/films?projection=filmProjection&page=" + page + "&size=" + size;
     }
+    
+    try {
+        return restTemplate.getForObject(url, FilmResponse.class);
+    } catch (Exception e) {
+        return new FilmResponse(); // Return empty if error
+    }
+}
 
-    // ✅ CREATE FILM
+    // ✅ CREATE (Send basic object to the collection endpoint)
     public void saveFilm(FilmDTO film) {
-        // film.setActors(null); 
+        String url = baseUrl + "/films";
+        try {
+            restTemplate.postForObject(url, film, String.class);
+        } catch (Exception e) {
+            System.err.println("Error saving film: " + e.getMessage());
+        }
+    }
+    
 
-        restTemplate.postForObject(baseUrl + "/films", film, FilmDTO.class);
+
+    public FilmDTO getFilmById(Long id) {
+    // We use the projection here so the UI sees the Language name
+    String url = baseUrl + "/films/" + id + "?projection=filmProjection";
+    return restTemplate.getForObject(url, FilmDTO.class);
+}
+
+public void saveOrUpdateFilm(FilmDTO film, String selectedLanguageId) {
+    try {
+        java.util.Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put("title", film.getTitle());
+        payload.put("description", film.getDescription());
+        payload.put("releaseYear", film.getReleaseYear());
+        payload.put("rentalDuration", film.getRentalDuration());
+        payload.put("rentalRate", film.getRentalRate());
+        payload.put("length", film.getLength());
+        payload.put("replacementCost", film.getReplacementCost());
+        
+        // Fix 1: Ensure Rating matches Enum Constant Name (e.g. PG_13 if applicable, or exactly the string)
+        // Usually, Enum converters expect the string value. If "PG-13" is in the UI, check your backend Enum name.
+        payload.put("rating", film.getRating());
+
+        // Fix 2: Convert "Behind the Scenes" UI values to "BEHIND_THE_SCENES" for your HashSet converter
+        if (film.getSpecialFeatures() != null) {
+            java.util.List<String> formattedFeatures = film.getSpecialFeatures().stream()
+                .map(f -> f.toUpperCase().replace(" ", "_"))
+                .collect(java.util.stream.Collectors.toList());
+            payload.put("specialFeatures", formattedFeatures);
+        }
+
+        // Fix 3: Ensure URI for Language is perfectly formed
+        // Verify baseUrl in application.properties doesn't end with a slash if you add one here
+        String languageUri = baseUrl + "/languages/" + selectedLanguageId;
+        payload.put("language", languageUri);
+
+        if (film.getFilmId() != null && !film.getFilmId().isEmpty()) {
+            restTemplate.put(baseUrl + "/films/" + film.getFilmId(), payload);
+        } else {
+            restTemplate.postForObject(baseUrl + "/films", payload, String.class);
+        }
+    } catch (org.springframework.web.client.HttpClientErrorException e) {
+        System.err.println("Backend Validation Error: " + e.getResponseBodyAsString());
+        throw e;
+    } catch (Exception e) {
+        System.err.println("Save Error: " + e.getMessage());
+        throw e;
+    }
+}
+
+    // ✅ DELETE (Identify by Short ID)
+    public void deleteFilm(Short id) {
+        String url = baseUrl + "/films/" + id;
+        try {
+            restTemplate.delete(url);
+        } catch (Exception e) {
+            System.err.println("Error deleting film: " + e.getMessage());
+        }
     }
 
-    // ✅ DELETE FILM
-    public void deleteFilm(Long id) {
-        restTemplate.delete(baseUrl + "/films/" + id);
+   public List<ActorDTO> getActorsByFilm(Long filmId) {
+    String url = baseUrl + "/films/" + filmId + "/actors?projection=actorProjection";
+    
+    // DEBUG: Print this URL and open it in your browser to check the data
+    System.out.println("Fetching actors from: " + url);
+    
+    try {
+        // We fetch as String first to see the RAW JSON in the console
+        String rawJson = restTemplate.getForObject(url, String.class);
+        System.out.println("RAW JSON FROM BACKEND: " + rawJson);
+
+        ActorResponse response = restTemplate.getForObject(url, ActorResponse.class);
+        return (response != null && response.getEmbedded() != null) ? 
+                response.getEmbedded().getActors() : new java.util.ArrayList<>();
+    } catch (Exception e) {
+        return new java.util.ArrayList<>();
     }
+}
+
+
 
     //Language Backend End points
     public LanguageResponse getAllLanguage(int page, int size){
