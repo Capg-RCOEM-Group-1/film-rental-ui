@@ -21,19 +21,38 @@ public class FilmController {
     private ExternalApiService apiService;
 
     // ✅ LIST films
-   @GetMapping
-public String getFilms(@RequestParam(required = false) String keyword, 
-                       @RequestParam(defaultValue = "0") int page, // Receive page here
-                       Model model) {
+    @GetMapping
+public String listFilms(@RequestParam(required = false) String keyword, 
+                        @RequestParam(defaultValue = "0") int page, 
+                        Model model) {
     
-    // Pass the page and a size (e.g., 20) to your service
-    FilmResponse response = apiService.getAllFilms(keyword, page, 20); 
+    // Call service with current keyword
+    FilmResponse response = apiService.getAllFilms(keyword, page, 20);
     
-    model.addAttribute("films", response.getEmbedded() != null ? response.getEmbedded().getFilms() : null);
-    model.addAttribute("pageData", response.getPageData()); // Pass paging info to HTML
-    model.addAttribute("currentKeyword", keyword);
+    // Pass results to UI
+    model.addAttribute("films", (response != null && response.getEmbedded() != null) ? response.getEmbedded().getFilms() : null);
+    
+    // Handle the Page object (may be null if List<Film> search was used)
+    model.addAttribute("pageData", response != null ? response.getPageData() : null);
+    
+    // Important: Keep the keyword in the search box so user sees what they searched for
+    model.addAttribute("currentKeyword", keyword); 
+    
     return "films";
 }
+//    @GetMapping
+// public String getFilms(@RequestParam(required = false) String keyword, 
+//                        @RequestParam(defaultValue = "0") int page, // Receive page here
+//                        Model model) {
+    
+//     // Pass the page and a size (e.g., 20) to your service
+//     FilmResponse response = apiService.getAllFilms(keyword, page, 20); 
+    
+//     model.addAttribute("films", response.getEmbedded() != null ? response.getEmbedded().getFilms() : null);
+//     model.addAttribute("pageData", response.getPageData()); // Pass paging info to HTML
+//     model.addAttribute("currentKeyword", keyword);
+//     return "films";
+// }
 
     // ADD FORM
     @GetMapping("/new")

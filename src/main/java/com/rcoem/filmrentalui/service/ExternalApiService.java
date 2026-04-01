@@ -190,22 +190,47 @@ public class ExternalApiService {
         return restTemplate.getForObject(url, String.class);
     }
 
- // ✅ GET ALL FILMS
-    public FilmResponse getAllFilms(String keyword, int page, int size) {
+    // ✅ GET ALL FILMS
+ public FilmResponse getAllFilms(String keyword, int page, int size) {
     String url;
+    
     if (keyword != null && !keyword.isEmpty()) {
-        url = baseUrl + "/films/search/findByTitleContaining?title=" + keyword 
-            + "&projection=filmProjection&page=" + page + "&size=" + size;
+        // ✅ Hits your specific @RestResource(path = "byTitle")
+        // Note: Use 'title' as the parameter name because of your @Param("title")
+        url = baseUrl + "/films/search/byTitle?title=" + keyword 
+            + "&projection=filmProjection"; 
+            
+        // Note: Since your repository method returns List<Film>, 
+        // the backend might ignore page/size during search.
     } else {
+        // Normal paginated list
         url = baseUrl + "/films?projection=filmProjection&page=" + page + "&size=" + size;
     }
-    
+
     try {
+        // Even if the repository returns a List, Spring Data REST wraps it 
+        // in an "_embedded" object, so your FilmResponse class will still work.
         return restTemplate.getForObject(url, FilmResponse.class);
     } catch (Exception e) {
-        return new FilmResponse(); // Return empty if error
+        System.err.println("API Search Error: " + e.getMessage());
+        return new FilmResponse(); 
     }
 }
+//     public FilmResponse getAllFilms(String keyword, int page, int size) {
+//     String url;
+//     if (keyword != null && !keyword.isEmpty()) {
+//         url = baseUrl + "/films/search/findByTitleContaining?title=" + keyword 
+//             + "&projection=filmProjection&page=" + page + "&size=" + size;
+//     } else {
+//         url = baseUrl + "/films?projection=filmProjection&page=" + page + "&size=" + size;
+//     }
+    
+//     try {
+//         return restTemplate.getForObject(url, FilmResponse.class);
+//     } catch (Exception e) {
+//         return new FilmResponse(); // Return empty if error
+//     }
+// }
 
     // ✅ CREATE (Send basic object to the collection endpoint)
     public void saveFilm(FilmDTO film) {
