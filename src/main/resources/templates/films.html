@@ -5,30 +5,66 @@
 </head>
 <body>
 
+
 <h1>Films List</h1>
 
-<a href="/films/new">Add Film</a>
 
-<table border="1">
+<a th:href="@{/films/new}">Add Film</a>
+
+
+<br><br>
+
+
+<table border="1" cellpadding="10">
     <tr>
         <th>Title</th>
         <th>Description</th>
         <th>Year</th>
+        <th>Length</th>
+        <th>Rating</th>
+        <th>Language</th>
+        <th>Rental Rate</th>
+        <th>Replacement Cost</th>
+        <th>Special Features</th>
         <th>Actions</th>
     </tr>
+
 
     <tr th:each="film : ${films}">
         <td th:text="${film.title}"></td>
         <td th:text="${film.description}"></td>
         <td th:text="${film.releaseYear}"></td>
+        <td th:text="${film.length}"></td>
+        <td th:text="${film.rating}"></td>
+        <td th:text="${film.language}"></td>
+        <td th:text="${film.rentalRate}"></td>
+        <td th:text="${film.replacementCost}"></td>
+
+
+        <!-- Handle list safely -->
         <td>
-            <a th:href="@{/films/delete/{id}(id=${film.filmId})}">
+            <span th:if="${film.specialFeatures != null}"
+                  th:text="${#strings.arrayJoin(film.specialFeatures, ', ')}">
+            </span>
+        </td>
+
+
+        <td>
+            <!-- ✅ DELETE -->
+            <a th:href="@{/films/delete/{id}(id=${film.idFromLink})}"
+               onclick="return confirm('Are you sure you want to delete this film?');">
                 Delete
             </a>
         </td>
     </tr>
 
+
 </table>
+
 
 </body>
 </html>
+
+
+
+

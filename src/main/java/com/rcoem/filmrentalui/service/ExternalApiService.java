@@ -40,27 +40,62 @@ public class ExternalApiService {
         return restTemplate.getForObject(url, CustomerPageResponse.class);
     }
     
+   
  // ✅ GET ALL FILMS
-    public List<FilmDTO> getAllFilms() {
-        String url = baseUrl + "/films?projection=filmProjection";
+ public List<FilmDTO> getAllFilms() {
+    String url = baseUrl + "/films?projection=filmProjection";
 
-        FilmResponse response =
-                restTemplate.getForObject(url, FilmResponse.class);
 
-        return response.get_embedded().getFilms();
-    }
+    FilmResponse response =
+            restTemplate.getForObject(url, FilmResponse.class);
 
-    // ✅ CREATE FILM
+
+    return response.getEmbedded().getFilms();
+}
+
+
+
+
+
+
+
+
+// ✅ CREATE FILM
     public void saveFilm(FilmDTO film) {
-        // film.setActors(null); 
+    String url = baseUrl + "/films?projection=filmProjection";
 
-        restTemplate.postForObject(baseUrl + "/films", film, FilmDTO.class);
+
+    try {
+        restTemplate.postForObject(url, film, String.class);
+    } catch (Exception e) {
+        e.printStackTrace();  // 👈 MUST
     }
+}
+
+
+//    public void saveFilm(FilmDTO film) {
+//     String url = baseUrl + "/films";
+
+
+//     restTemplate.postForObject(url, film, FilmDTO.class);
+// }
+
+
+
 
     // ✅ DELETE FILM
-    public void deleteFilm(Long id) {
-        restTemplate.delete(baseUrl + "/films/" + id);
-    }
+   public void deleteFilm(Long id) {
+    String url = baseUrl + "/films?projection=filmProjection";
+
+
+
+
+    restTemplate.delete(url);
+}
+
+
+
+
 
 
 
