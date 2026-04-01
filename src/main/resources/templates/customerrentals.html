@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Rentals</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen p-4 sm:p-8 fade-in">
+
+    <div class="max-w-6xl mx-auto">
+
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h2 id="page-title" class="text-3xl font-extrabold text-gray-900 tracking-tight">Rental Details</h2>
+                <p class="text-gray-500 mt-2 text-sm">View film rental history for this specific customer.</p>
+            </div>
+            <a href="/ekansh/customers"
+                class="inline-flex items-center px-4 py-2 border border-blue-600 rounded-lg shadow-sm text-sm font-medium text-blue-600 bg-transparent hover:bg-blue-50 transition duration-150">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Customers
+            </a>
+        </div>
+
+        <div class="bg-white shadow-md rounded-xl border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-20">
+                                Sr No</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Film Name</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Price Paid</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Rental Date</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Return Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rentals-table-body" class="bg-white divide-y divide-gray-100">
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-gray-500" id="loading-text">
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600 inline-block"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                                Loading rentals...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4" id="pagination-container"
+            style="display: none;">
+            <div
+                class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm w-full flex items-center justify-between">
+                <div id="page-info" class="text-sm text-gray-700"></div>
+                <div class="flex gap-2" id="pagination-controls"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const PAGE_SIZE = 10;
+        let globalCustomerId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            globalCustomerId = urlParams.get('customerId');
+            const customerName = urlParams.get('name');
+
+            if (customerName) {
+                document.getElementById('page-title').textContent = `Rental Details for ${customerName}`;
+            }
+
+            if (globalCustomerId) {
+                fetchRentals(0);
+            } else {
+                document.getElementById('loading-text').innerHTML = `
+                <div class="text-red-500 font-medium">Error: No Customer ID provided in URL.</div>
+            `;
+            }
+        });
+
+        async function fetchRentals(pageNumber) {
+            try {
+                // Proxied via your Spring Boot UI server to gracefully handle any CORS issues!
+                const apiUrl = `/ekansh/api/rentals?customerId=${globalCustomerId}&page=${pageNumber}&size=${PAGE_SIZE}`;
+
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                    throw new Error("HTTP connection failed");
+                }
+
+                const data = await response.json();
+                const tbody = document.getElementById('rentals-table-body');
+                tbody.innerHTML = '';
+
+                const rentals = data._embedded ? data._embedded.customerRentalViews : [];
+                const pageData = data.page;
+
+                document.getElementById('pagination-container').style.display = 'flex';
+
+                if (rentals.length === 0) {
+                    tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No rentals found</h3>
+                            <p class="mt-1 text-sm text-gray-500">This customer hasn't rented anything yet.</p>
+                        </td>
+                    </tr>`;
+                    updatePaginationUI(null);
+                    return;
+                }
+
+                rentals.forEach((rental, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-blue-50 transition duration-150 ease-in-out';
+
+                    const srNo = (pageData.number * pageData.size) + index + 1;
+                    const rDate = rental.rentalDate ? new Date(rental.rentalDate).toLocaleString() : 'N/A';
+
+                    let retDate = 'Not Returned Yet';
+                    let retClass = 'text-yellow-600 font-medium bg-yellow-100 px-2 py-1 rounded-full text-xs';
+
+                    if (rental.returnDate) {
+                        retDate = new Date(rental.returnDate).toLocaleString();
+                        retClass = 'text-gray-600';
+                    }
+
+                    const priceFormatted = rental.price ? `$${rental.price.toFixed(2)}` : '$0.00';
+
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-400">${srNo}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${rental.filmName}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">${priceFormatted}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${rDate}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm ${retClass}">${retDate}</span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                updatePaginationUI(pageData);
+
+            } catch (error) {
+                console.error("Error fetching rentals:", error);
+                document.getElementById('rentals-table-body').innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-red-500 font-medium">
+                        Failed to load rental data. Ensure backend is running.
+                    </td>
+                </tr>`;
+            }
+        }
+
+        function updatePaginationUI(pageData) {
+            const controlsDiv = document.getElementById('pagination-controls');
+            const infoDiv = document.getElementById('page-info');
+
+            if (!pageData) {
+                controlsDiv.innerHTML = '';
+                infoDiv.innerHTML = '';
+                return;
+            }
+
+            const currentPage = pageData.number;
+            const totalPages = pageData.totalPages;
+
+            infoDiv.innerHTML = `Showing page <span class="font-semibold text-gray-900">${currentPage + 1}</span> of <span class="font-semibold text-gray-900">${totalPages}</span> <span class="text-gray-400 mx-1">|</span> Total: <span class="font-semibold text-gray-900">${pageData.totalElements}</span> rentals`;
+
+            let buttonsHtml = '';
+            const btnClass = "relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition shadow-sm";
+            const disabledClass = "relative inline-flex items-center px-4 py-2 border border-gray-200 text-sm font-medium rounded-md text-gray-400 bg-gray-50 cursor-not-allowed";
+
+            if (currentPage > 0) {
+                buttonsHtml += `<button class="${btnClass}" onclick="fetchRentals(${currentPage - 1})">Previous</button>`;
+            } else {
+                buttonsHtml += `<button class="${disabledClass}" disabled>Previous</button>`;
+            }
+
+            if (currentPage < totalPages - 1) {
+                buttonsHtml += `<button class="${btnClass}" onclick="fetchRentals(${currentPage + 1})">Next</button>`;
+            } else {
+                buttonsHtml += `<button class="${disabledClass}" disabled>Next</button>`;
+            }
+
+            controlsDiv.innerHTML = buttonsHtml;
+        }
+    </script>
+</body>
+
+</html>
