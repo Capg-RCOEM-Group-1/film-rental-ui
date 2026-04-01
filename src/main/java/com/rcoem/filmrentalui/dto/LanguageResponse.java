@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class LanguageResponse {
     @JsonProperty("_embedded")
     private EmbeddedLanguage embeddedLanguage;
+    @JsonProperty("page")
     private PageData pageData;
 
     public EmbeddedLanguage getEmbeddedLanguage() {

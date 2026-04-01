@@ -56,7 +56,8 @@ public class LanguageController {
             if(response != null && response.getEmbedded() != null){
                 model.addAttribute("films",response.getEmbedded().getFilms());
             }
-            model.addAttribute("language",name);
+            model.addAttribute("id",id);
+            model.addAttribute("name",name);
             model.addAttribute("pageData", response != null ? response.getPageData() : null);
         }catch (Exception e){
             logger.error("Failed to fetch film data from backend API. Page: {}",page,e);

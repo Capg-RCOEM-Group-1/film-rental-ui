@@ -27,14 +27,15 @@ public class FilmResponse {
             this.films = films;
         }
     }
-    private PageData pageData;
+    @JsonProperty("page")
+    private PageData page;
 
     public PageData getPageData() {
-        return pageData;
+        return page;
     }
 
     public void setPageData(PageData pageData) {
-        this.pageData = pageData;
+        this.page = pageData;
     }
 }
 
