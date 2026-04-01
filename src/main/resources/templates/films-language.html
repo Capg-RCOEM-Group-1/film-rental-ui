@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Films</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f4f4f4; }
+
+        /* Removed clickable-row hover effect since the link is now in a button/action column */
+        tr:hover { background-color: #f9f9f9; }
+
+        .header-controls { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+        .hint { color: #666; font-size: 0.9em; margin: 0; }
+
+        /* Search Bar Styles */
+        .search-container { display: flex; gap: 10px; }
+        .search-container input { padding: 10px; width: 300px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+        .search-container button { padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 4px; cursor: pointer; }
+        .search-container button:hover { background-color: #0056b3; }
+        .clear-btn { padding: 10px 15px; text-decoration: none; background-color: #f4f4f4; color: #333; border: 1px solid #ccc; border-radius: 4px; }
+
+        /* Pagination Styles */
+        .pagination-container { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .pagination-controls a { text-decoration: none; }
+        .pagination-controls button { padding: 8px 16px; margin: 0 5px; cursor: pointer; border: 1px solid #ccc; background-color: #f9f9f9; border-radius: 4px; color: #333; }
+        .pagination-controls button:hover { background-color: #e9e9e9; }
+        .page-info { font-size: 0.9em; color: #555; }
+
+        .error-message { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .action-link { color: #007bff; text-decoration: none; font-weight: bold; }
+        .action-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<h1>Films List</h1>
+
+<a href="/films/new">Add Film</a>
+
+<table border="1">
+    <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Year</th>
+        <th>Actions</th>
+    </tr>
+
+    <tr th:each="film : ${films}">
+        <td th:text="${film.title}"></td>
+        <td th:text="${film.description}"></td>
+        <td th:text="${film.releaseYear}"></td>
+        <td>
+            <a th:href="@{/films/delete/{id}(id=${film.filmId})}">
+                Delete
+            </a>
+        </td>
+    </tr>
+    <tr th:if="${languages == null or languages.isEmpty()}">
+        <td colspan="4" style="text-align: center; padding: 20px; color: #666;">
+            No Language found matching your criteria.
+        </td>
+    </tr>
+</table>
+<div class="pagination-container" th:if="${pageData != null and pageData.totalPages > 0}">
+    <div class="page-info">
+        Showing page <span th:text="${pageData.number + 1}"></span> of <span th:text="${pageData.totalPages}"></span>
+        (Total: <span th:text="${pageData.totalElements}"></span> customers)
+    </div>
+
+    <div class="pagination-controls">
+        <a th:if="${pageData.number > 0}"
+           th:href="@{/mandar/languages(page=${pageData.number - 1}, keyword=${currentKeyword})}">
+            <button>Previous</button>
+        </a>
+
+        <a th:if="${pageData.number < pageData.totalPages - 1}"
+           th:href="@{/mandar/languages(page=${pageData.number + 1}}">
+            <button>Next</button>
+        </a>
+    </div>
+</div>
+</body>
+</html>

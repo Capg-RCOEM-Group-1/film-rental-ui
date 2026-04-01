@@ -2,33 +2,113 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Films</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-100 p-8">
 
-<h1>Films List</h1>
+<div class="max-w-6xl mx-auto bg-white shadow-md rounded-xl p-6 fade-in">
 
-<a href="/films/new">Add Film</a>
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">
+            🎬 Films List
+        </h1>
 
-<table border="1">
-    <tr>
-        <th>Title</th>
-        <th>Description</th>
-        <th>Year</th>
-        <th>Actions</th>
-    </tr>
+        <a href="/films/new"
+           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow">
+            + Add Film
+        </a>
+    </div>
 
-    <tr th:each="film : ${films}">
-        <td th:text="${film.title}"></td>
-        <td th:text="${film.description}"></td>
-        <td th:text="${film.releaseYear}"></td>
-        <td>
-            <a th:href="@{/films/delete/{id}(id=${film.filmId})}">
-                Delete
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+            <thead class="bg-gray-100">
+            <tr>
+                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Title</th>
+                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Description</th>
+                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Year</th>
+                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Actions</th>
+            </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-200">
+
+            <tr th:each="film : ${films}" class="hover:bg-gray-50 transition">
+                <td class="px-4 py-3 font-medium text-gray-800" th:text="${film.title}"></td>
+                <td class="px-4 py-3 text-gray-600" th:text="${film.description}"></td>
+                <td class="px-4 py-3 text-gray-600" th:text="${film.releaseYear}"></td>
+                <td class="px-4 py-3">
+                    <a th:href="@{/films/delete/{id}(id=${film.filmId})}"
+                       class="text-red-500 hover:text-red-700 font-semibold">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+
+            <tr th:if="${films == null or films.isEmpty()}">
+                <td colspan="4" class="text-center py-6 text-gray-500">
+                    No Films found matching your criteria.
+                </td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
+         th:if="${pageData != null and pageData.totalPages > 0}">
+
+        <!-- Info -->
+        <p class="text-sm text-gray-600">
+            Page
+            <span class="font-semibold text-gray-800" th:text="${pageData.number + 1}"></span>
+            of
+            <span class="font-semibold text-gray-800" th:text="${pageData.totalPages}"></span>
+            |
+            Total:
+            <span class="font-semibold text-gray-800" th:text="${pageData.totalElements}"></span>
+        </p>
+
+        <!-- Controls -->
+        <div class="flex gap-2">
+
+            <!-- Previous -->
+            <a th:if="${pageData.number > 0}"
+               th:href="@{/mandar/language/films(page=${pageData.number - 1}, id=${id}, name=${name})}"
+               class="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-100 transition shadow-sm">
+                ⬅ Previous
             </a>
-        </td>
-    </tr>
 
-</table>
+            <!-- Next -->
+            <a th:if="${pageData.number < pageData.totalPages - 1}"
+               th:href="@{/mandar/language/films(page=${pageData.number + 1}, id=${id}, name=${name})}"
+               class="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-100 transition shadow-sm">
+                Next ➡
+            </a>
+
+        </div>
+    </div>
+
+</div>
 
 </body>
 </html>
