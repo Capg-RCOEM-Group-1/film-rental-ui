@@ -30,9 +30,11 @@ public class ExternalApiService {
 
 
     public CategoryFilmResponse getFilmsByCategory(Byte categoryId, int page, int size) {
-        // Use category ID to fetch films through film_category join table
         String url = baseUrl + "/films/search/byCategoryId?categoryId=" + categoryId + "&page=" + page + "&size=" + size;
-        return restTemplate.getForObject(url, CategoryFilmResponse.class);
+        System.out.println("DEBUG: Calling URL: " + url);
+        CategoryFilmResponse response = restTemplate.getForObject(url, CategoryFilmResponse.class);
+        System.out.println("DEBUG: Raw response: " + response);
+        return response;
     }
 
     public CategoryResponse getCategories(int page, int size) {

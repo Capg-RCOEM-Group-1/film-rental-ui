@@ -104,10 +104,20 @@ public class CategoryFilmController {
             @RequestParam(defaultValue = "0") int page,
             Model model) {
 
+        System.out.println("DEBUG: Fetching films for categoryId=" + categoryId + ", name=" + name + ", page=" + page);
+
         try {
             CategoryFilmResponse response = apiService.getFilmsByCategory(categoryId, page, 10);
 
-            if (response != null && response.getEmbedded() != null) {
+            System.out.println("DEBUG: Response=" + response);
+            if (response != null) {
+                System.out.println("DEBUG: Embedded=" + response.getEmbedded());
+                if (response.getEmbedded() != null) {
+                    System.out.println("DEBUG: Films count=" + (response.getEmbedded().getFilms() != null ? response.getEmbedded().getFilms().size() : "null"));
+                }
+            }
+
+            if (response != null && response.getEmbedded() != null && response.getEmbedded().getFilms() != null) {
                 model.addAttribute("films", response.getEmbedded().getFilms());
                 model.addAttribute("page", response.getPage());
             } else {
@@ -115,6 +125,8 @@ public class CategoryFilmController {
                 model.addAttribute("page", new com.rcoem.filmrentalui.dto.PageData());
             }
         } catch (Exception e) {
+            System.out.println("DEBUG: Exception: " + e.getMessage());
+            e.printStackTrace();
             model.addAttribute("error", "Failed to load films: " + e.getMessage());
             model.addAttribute("films", java.util.Collections.emptyList());
         }
