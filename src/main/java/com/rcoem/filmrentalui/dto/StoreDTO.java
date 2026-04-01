@@ -1,28 +1,41 @@
 package com.rcoem.filmrentalui.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
-import java.sql.Timestamp;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.Setter;
 
-@Getter @Setter
-@AllArgsConstructor @NoArgsConstructor
-public class StoreDTO {
-    private Byte storeId;
+@Getter
+@Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class CustomerStoreDTO {
+    private Short storeId; // Still needed for your Java logic
     private String address;
     private String city;
-    private Timestamp lastUpdate;
 
-    // JACKSON uses this to map the "_links" part of your JSON to your storeId
-    @JsonProperty("_links")
-    public void setLinks(Map<String, Object> links) {
+    // Getters and Setters
+    public Short getStoreId() { return storeId; }
+    public void setStoreId(Short storeId) { this.storeId = storeId; }
+
+    @com.fasterxml.jackson.annotation.JsonProperty("_links")
+    public void unpackId(java.util.Map<String, Object> links) {
         try {
-            Map<String, String> self = (Map<String, String>) links.get("self");
-            String href = self.get("href");
-            // This extracts '1' from 'http://localhost:8080/stores/1'
-            this.storeId = Byte.parseByte(href.substring(href.lastIndexOf("/") + 1));
-        } catch (Exception e) {
-            this.storeId = 0;
-        }
+            java.util.Map<String, String> self = (java.util.Map<String, String>) links.get("store");
+            if (self == null) self = (java.util.Map<String, String>) links.get("self");
+            if (self != null) {
+                String href = self.get("href").replaceAll("\\{.*\\}", "");
+                String idStr = href.substring(href.lastIndexOf('/') + 1);
+                this.storeId = Short.parseShort(idStr);
+            }
+        } catch (Exception e) {}
+    }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+
+    public String getFullDisplay() {
+        return address != null ? (city != null ? address + ", " + city : address) : "";
     }
 }
