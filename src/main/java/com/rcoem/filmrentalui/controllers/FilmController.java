@@ -40,8 +40,8 @@ public class FilmController {
     }
 
     // ✅ DELETE film
-    @GetMapping("/delete/{id}")
-    public String deleteFilm(@PathVariable Long id) {
+     @GetMapping("/delete/{id}")
+    public String deleteFilm(@PathVariable Short id) {
         apiService.deleteFilm(id);
         return "redirect:/films";
     }

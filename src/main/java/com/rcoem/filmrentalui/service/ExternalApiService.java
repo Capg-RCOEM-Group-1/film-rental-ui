@@ -123,67 +123,62 @@ public class ExternalApiService {
         payload.put("lastName", formDTO.getLastName());
         payload.put("email", formDTO.getEmail());
         payload.put("active", 1);
-        
+
         payload.put("store", this.baseUrl + "stores/" + formDTO.getStoreId());
         payload.put("address", this.baseUrl + "addresses/" + formDTO.getAddressId());
 
         org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
         headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-        org.springframework.http.HttpEntity<java.util.Map<String, Object>> request = new org.springframework.http.HttpEntity<>(payload, headers);
+        org.springframework.http.HttpEntity<java.util.Map<String, Object>> request = new org.springframework.http.HttpEntity<>(
+                payload, headers);
 
-        restTemplate.exchange(this.baseUrl + "customers/" + customerId, org.springframework.http.HttpMethod.PUT, request, String.class);
+        restTemplate.exchange(this.baseUrl + "customers/" + customerId, org.springframework.http.HttpMethod.PUT,
+                request, String.class);
     }
 
- // ✅ GET ALL FILMS
- public List<FilmDTO> getAllFilms() {
-     String url = baseUrl + "/films?projection=filmProjection";
 
-     FilmResponse response = restTemplate.getForObject(url, FilmResponse.class);
-     return response.getEmbedded().getFilms();
- }
+     public List<FilmDTO> getAllFilms() {
+        String url = baseUrl + "/films?projection=filmProjection";
+        try {
+            FilmResponse response = restTemplate.getForObject(url, FilmResponse.class);
+            if (response != null && response.getEmbedded() != null) {
+                return response.getEmbedded().getFilms();
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching films: " + e.getMessage());
+        }
+        return new java.util.ArrayList<>();
+    }
 
-
-
-
-
-
-
-
-
-// ✅ CREATE FILM
+    // ✅ CREATE (Send basic object to the collection endpoint)
     public void saveFilm(FilmDTO film) {
-    String url = baseUrl + "/films?projection=filmProjection";
-
-
-    try {
-        restTemplate.postForObject(url, film, String.class);
-    } catch (Exception e) {
-        e.printStackTrace();  // 👈 MUST
+        String url = baseUrl + "/films"; 
+        try {
+            restTemplate.postForObject(url, film, String.class);
+        } catch (Exception e) {
+            System.err.println("Error saving film: " + e.getMessage());
+        }
     }
-}
 
+    // ✅ UPDATE (Identify by Short ID)
+    public void updateFilm(Short id, FilmDTO film) {
+        String url = baseUrl + "/films/" + id;
+        try {
+            restTemplate.put(url, film);
+        } catch (Exception e) {
+            System.err.println("Error updating film: " + e.getMessage());
+        }
+    }
 
-//    public void saveFilm(FilmDTO film) {
-//     String url = baseUrl + "/films";
-
-
-//     restTemplate.postForObject(url, film, FilmDTO.class);
-// }
-
-
-
-
-    // ✅ DELETE FILM
-   public void deleteFilm(Long id) {
-    String url = baseUrl + "/films?projection=filmProjection";
-
-
-
-
-    restTemplate.delete(url);
-}
-
-
+    // ✅ DELETE (Identify by Short ID)
+    public void deleteFilm(Short id) {
+        String url = baseUrl + "/films/" + id;
+        try {
+            restTemplate.delete(url);
+        } catch (Exception e) {
+            System.err.println("Error deleting film: " + e.getMessage());
+        }
+    }
 
 
 

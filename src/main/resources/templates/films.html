@@ -19,101 +19,96 @@
                 transform: translateY(0);
             }
         }
+
+        /* ✅ Added border styles */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-8">
 
-<div class="max-w-6xl mx-auto bg-white shadow-md rounded-xl p-6 fade-in">
 
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">
-            🎬 Films List
-        </h1>
+<h1>Films List</h1>
 
-        <a href="/films/new"
-           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow">
-            + Add Film
-        </a>
-    </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto">
-        <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
-            <thead class="bg-gray-100">
-            <tr>
-                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Title</th>
-                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Description</th>
-                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Year</th>
-                <th class="text-left px-4 py-3 text-sm font-semibold text-gray-600">Actions</th>
-            </tr>
-            </thead>
+<a th:href="@{/films/new}">Add Film</a>
 
-            <tbody class="divide-y divide-gray-200">
 
-            <tr th:each="film : ${films}" class="hover:bg-gray-50 transition">
-                <td class="px-4 py-3 font-medium text-gray-800" th:text="${film.title}"></td>
-                <td class="px-4 py-3 text-gray-600" th:text="${film.description}"></td>
-                <td class="px-4 py-3 text-gray-600" th:text="${film.releaseYear}"></td>
-                <td class="px-4 py-3">
-                    <a th:href="@{/films/delete/{id}(id=${film.filmId})}"
-                       class="text-red-500 hover:text-red-700 font-semibold">
-                        Delete
-                    </a>
-                </td>
-            </tr>
+<br><br>
 
-            <tr th:if="${films == null or films.isEmpty()}">
-                <td colspan="4" class="text-center py-6 text-gray-500">
-                    No Films found matching your criteria.
-                </td>
-            </tr>
 
-            </tbody>
-        </table>
-    </div>
+<table border="1" cellpadding="10">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Year</th>
+            <th>Length</th>
+            <th>Rating</th>
+            <th>Language</th>
+            <th>Rental Rate</th>        <!-- Header 7 -->
+            <th>Replacement Cost</th>  <!-- Header 8 -->
+            <th>Special Features</th>   <!-- Header 9 -->
+            <th>Actions</th>           <!-- Header 10 -->
+        </tr>
+    </thead>
 
-    <!-- Pagination -->
-    <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-         th:if="${pageData != null and pageData.totalPages > 0}">
+    <tbody>
+        <tr th:each="film : ${films}">
+            <td th:text="${film.title}"></td>
+            <td th:text="${film.description}"></td>
+            <td th:text="${film.releaseYear}"></td>
+            <td th:text="${film.length}"></td>
+            <td th:text="${film.rating}"></td>
+            <td th:text="${film.language}"></td>
+            
+            <!-- 7. Rental Rate (Matches Header) -->
+            <td th:text="${'$' + film.rentalRate}"></td>
+            
+            <!-- 8. Replacement Cost (Matches Header) -->
+            <td th:text="${'$' + film.replacementCost}"></td>
 
-        <!-- Info -->
-        <p class="text-sm text-gray-600">
-            Page
-            <span class="font-semibold text-gray-800" th:text="${pageData.number + 1}"></span>
-            of
-            <span class="font-semibold text-gray-800" th:text="${pageData.totalPages}"></span>
-            |
-            Total:
-            <span class="font-semibold text-gray-800" th:text="${pageData.totalElements}"></span>
-        </p>
+            <!-- 9. Special Features (MOVED HERE TO MATCH HEADER) -->
+            <td class="p-3 text-xs italic">
+                <span th:if="${film.specialFeatures != null}"
+                      th:text="${#strings.listJoin(film.specialFeatures, ', ')}">
+                </span>
+                <span th:if="${film.specialFeatures == null}">None</span>
+            </td>
 
-        <!-- Controls -->
-        <div class="flex gap-2">
 
-            <!-- Previous -->
-            <a th:if="${pageData.number > 0}"
-               th:href="@{/mandar/language/films(page=${pageData.number - 1}, id=${id}, name=${name})}"
-               class="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-100 transition shadow-sm">
-                ⬅ Previous
+        <td>
+            <!-- ✅ DELETE -->
+            <a th:href="@{/films/delete/{id}(id=${film.idFromLink})}"
+               onclick="return confirm('Are you sure you want to delete this film?');">
+                Delete
             </a>
+        </td>
+    </tr>
 
-            <!-- Next -->
-            <a th:if="${pageData.number < pageData.totalPages - 1}"
-               th:href="@{/mandar/language/films(page=${pageData.number + 1}, id=${id}, name=${name})}"
-               class="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-100 transition shadow-sm">
-                Next ➡
-            </a>
 
-        </div>
-    </div>
-
-</div>
+</table>
 
 
 </body>
 </html>
-
-
-
-
