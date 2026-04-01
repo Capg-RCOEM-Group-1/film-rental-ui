@@ -48,15 +48,20 @@ public class LanguageController {
         return "languages";
 
     }
-    @RequestMapping("/films")
-    public String getFilmsLanguage(@RequestParam(value = "page", defaultValue = "0") int page, Model model,@RequestParam int id,@RequestParam String name){
+    @RequestMapping("/language/films")
+    public String getFilmsLanguage(@RequestParam(value = "page", defaultValue = "0") int page, Model model,@RequestParam Byte id,@RequestParam String name){
         try{
             FilmResponse response;
             response = externalApiService.getFilms(page,20,id,name);
-            if(response != null && response.get_embedded() != null){
-                model.addAttribute("films",response.get_embedded().getFilms());
+            if(response != null && response.getEmbedded() != null){
+                model.addAttribute("films",response.getEmbedded().getFilms());
             }
-            model.addAttribute("pageData", response != null ? response.get)
+            model.addAttribute("language",name);
+            model.addAttribute("pageData", response != null ? response.getPageData() : null);
+        }catch (Exception e){
+            logger.error("Failed to fetch film data from backend API. Page: {}",page,e);
+            model.addAttribute("error", "The language directory is currently unavailable.");
         }
+        return "films";
     }
 }

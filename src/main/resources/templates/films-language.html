@@ -57,6 +57,29 @@
             </a>
         </td>
     </tr>
+    <tr th:if="${languages == null or languages.isEmpty()}">
+        <td colspan="4" style="text-align: center; padding: 20px; color: #666;">
+            No Language found matching your criteria.
+        </td>
+    </tr>
 </table>
+<div class="pagination-container" th:if="${pageData != null and pageData.totalPages > 0}">
+    <div class="page-info">
+        Showing page <span th:text="${pageData.number + 1}"></span> of <span th:text="${pageData.totalPages}"></span>
+        (Total: <span th:text="${pageData.totalElements}"></span> customers)
+    </div>
+
+    <div class="pagination-controls">
+        <a th:if="${pageData.number > 0}"
+           th:href="@{/mandar/languages(page=${pageData.number - 1}, keyword=${currentKeyword})}">
+            <button>Previous</button>
+        </a>
+
+        <a th:if="${pageData.number < pageData.totalPages - 1}"
+           th:href="@{/mandar/languages(page=${pageData.number + 1}}">
+            <button>Next</button>
+        </a>
+    </div>
+</div>
 </body>
 </html>

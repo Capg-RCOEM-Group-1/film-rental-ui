@@ -1,17 +1,19 @@
 package com.rcoem.filmrentalui.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class FilmResponse {
+    @JsonProperty("_embedded")
+    private Embedded embedded;
 
-    private Embedded _embedded;
-
-    public Embedded get_embedded() {
-        return _embedded;
+    public Embedded getEmbedded() {
+        return embedded;
     }
 
-    public void set_embedded(Embedded _embedded) {
-        this._embedded = _embedded;
+    public void setEmbedded(Embedded _embedded) {
+        this.embedded = _embedded;
     }
 
     public static class Embedded {
@@ -24,6 +26,15 @@ public class FilmResponse {
         public void setFilms(List<FilmDTO> films) {
             this.films = films;
         }
+    }
+    private PageData pageData;
+
+    public PageData getPageData() {
+        return pageData;
+    }
+
+    public void setPageData(PageData pageData) {
+        this.pageData = pageData;
     }
 }
 

@@ -63,7 +63,7 @@
     <tr th:each="language : ${languages}">
         <td th:text="${language.name}"></td>
         <td>
-            <a class="action-link" th:href="@{/mandar/films(id=${language.id}, name=${language.name})}">
+            <a class="action-link" th:href="@{/mandar/language/films(id=${language.id}, name=${language.name})}">
                 View Films
             </a>
         </td>
@@ -77,24 +77,24 @@
     </tbody>
 </table>
 
-<div class="pagination-container" th:if="${pageData != null and pageData.totalPages > 0}">
-    <div class="page-info">
-        Showing page <span th:text="${pageData.number + 1}"></span> of <span th:text="${pageData.totalPages}"></span>
-        (Total: <span th:text="${pageData.totalElements}"></span> customers)
-    </div>
+    <div class="pagination-container" th:if="${pageData != null and pageData.totalPages > 0}">
+        <div class="page-info">
+            Showing page <span th:text="${pageData.number + 1}"></span> of <span th:text="${pageData.totalPages}"></span>
+            (Total: <span th:text="${pageData.totalElements}"></span> customers)
+        </div>
 
-    <div class="pagination-controls">
-        <a th:if="${pageData.number > 0}"
-           th:href="@{/ekansh/customers(page=${pageData.number - 1}, keyword=${currentKeyword})}">
-            <button>Previous</button>
-        </a>
+        <div class="pagination-controls">
+            <a th:if="${pageData.number > 0}"
+               th:href="@{/mandar/languages(page=${pageData.number - 1}, keyword=${currentKeyword})}">
+                <button>Previous</button>
+            </a>
 
-        <a th:if="${pageData.number < pageData.totalPages - 1}"
-           th:href="@{/mandar/languages(page=${pageData.number + 1}}">
-            <button>Next</button>
-        </a>
+            <a th:if="${pageData.number < pageData.totalPages - 1}"
+               th:href="@{/mandar/languages(page=${pageData.number + 1}}">
+                <button>Next</button>
+            </a>
+        </div>
     </div>
-</div>
 
 </body>
 </html>

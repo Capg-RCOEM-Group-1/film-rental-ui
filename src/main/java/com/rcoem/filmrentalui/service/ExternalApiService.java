@@ -141,7 +141,7 @@ public class ExternalApiService {
         FilmResponse response =
                 restTemplate.getForObject(url, FilmResponse.class);
 
-        return response.get_embedded().getFilms();
+        return response.getEmbedded().getFilms();
     }
 
     // ✅ CREATE FILM
@@ -162,9 +162,11 @@ public class ExternalApiService {
         return restTemplate.getForObject(url,LanguageResponse.class);
     }
 
-   public FilmResponse getFilms(int page, int size, int id, String name){
-        String url = baseUrl+"/flims/search/findByLanguage_Id?page="+page+"&size="+size+"&id="+id+"&projection=filmView";
-        return restTemplate.getForObject(url,FilmResponse.class);
+   public FilmResponse getFilms(int page, int size, Byte id, String name){
+        String url = baseUrl+"/films/search/findByLanguage_Id?page="+page+"&size="+size+"&id="+id+"&projection=filmView";
+        FilmResponse response = restTemplate.getForObject(url,FilmResponse.class);
+       System.out.println(response.getEmbedded().getFilms());
+       return response;
    }
 
 
