@@ -46,19 +46,3 @@ public class FilmResponse {
 }
 
 
-
-
-// package com.rcoem.filmrentalui.dto;
-
-// public class FilmResponse {
-
-//     private EmbeddedFilms _embedded;
-
-//     public EmbeddedFilms get_embedded() {
-//         return _embedded;
-//     }
-
-//     public void set_embedded(EmbeddedFilms _embedded) {
-//         this._embedded = _embedded;
-//     }
-// }

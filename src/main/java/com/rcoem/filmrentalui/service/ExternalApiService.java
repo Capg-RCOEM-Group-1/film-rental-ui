@@ -191,38 +191,81 @@ public class ExternalApiService {
     }
 
  // ✅ GET ALL FILMS
-    public List<FilmDTO> getAllFilms() {
-        String url = baseUrl + "/films?projection=filmProjection";
-        try {
-            FilmResponse response = restTemplate.getForObject(url, FilmResponse.class);
-            if (response != null && response.getEmbedded() != null) {
-                return response.getEmbedded().getFilms();
-            }
-        } catch (Exception e) {
-            System.err.println("Error fetching films: " + e.getMessage());
-        }
-        return new java.util.ArrayList<>();
+    public FilmResponse getAllFilms(String keyword, int page, int size) {
+    String url;
+    if (keyword != null && !keyword.isEmpty()) {
+        url = baseUrl + "/films/search/findByTitleContaining?title=" + keyword 
+            + "&projection=filmProjection&page=" + page + "&size=" + size;
+    } else {
+        url = baseUrl + "/films?projection=filmProjection&page=" + page + "&size=" + size;
     }
+    
+    try {
+        return restTemplate.getForObject(url, FilmResponse.class);
+    } catch (Exception e) {
+        return new FilmResponse(); // Return empty if error
+    }
+}
 
     // ✅ CREATE (Send basic object to the collection endpoint)
     public void saveFilm(FilmDTO film) {
-        String url = baseUrl + "/films"; 
+        String url = baseUrl + "/films";
         try {
             restTemplate.postForObject(url, film, String.class);
         } catch (Exception e) {
             System.err.println("Error saving film: " + e.getMessage());
         }
     }
+    
 
-    // ✅ UPDATE (Identify by Short ID)
-    public void updateFilm(Short id, FilmDTO film) {
-        String url = baseUrl + "/films/" + id;
-        try {
-            restTemplate.put(url, film);
-        } catch (Exception e) {
-            System.err.println("Error updating film: " + e.getMessage());
+
+    public FilmDTO getFilmById(Long id) {
+    // We use the projection here so the UI sees the Language name
+    String url = baseUrl + "/films/" + id + "?projection=filmProjection";
+    return restTemplate.getForObject(url, FilmDTO.class);
+}
+
+public void saveOrUpdateFilm(FilmDTO film, String selectedLanguageId) {
+    try {
+        java.util.Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put("title", film.getTitle());
+        payload.put("description", film.getDescription());
+        payload.put("releaseYear", film.getReleaseYear());
+        payload.put("rentalDuration", film.getRentalDuration());
+        payload.put("rentalRate", film.getRentalRate());
+        payload.put("length", film.getLength());
+        payload.put("replacementCost", film.getReplacementCost());
+        
+        // Fix 1: Ensure Rating matches Enum Constant Name (e.g. PG_13 if applicable, or exactly the string)
+        // Usually, Enum converters expect the string value. If "PG-13" is in the UI, check your backend Enum name.
+        payload.put("rating", film.getRating());
+
+        // Fix 2: Convert "Behind the Scenes" UI values to "BEHIND_THE_SCENES" for your HashSet converter
+        if (film.getSpecialFeatures() != null) {
+            java.util.List<String> formattedFeatures = film.getSpecialFeatures().stream()
+                .map(f -> f.toUpperCase().replace(" ", "_"))
+                .collect(java.util.stream.Collectors.toList());
+            payload.put("specialFeatures", formattedFeatures);
         }
+
+        // Fix 3: Ensure URI for Language is perfectly formed
+        // Verify baseUrl in application.properties doesn't end with a slash if you add one here
+        String languageUri = baseUrl + "/languages/" + selectedLanguageId;
+        payload.put("language", languageUri);
+
+        if (film.getFilmId() != null && !film.getFilmId().isEmpty()) {
+            restTemplate.put(baseUrl + "/films/" + film.getFilmId(), payload);
+        } else {
+            restTemplate.postForObject(baseUrl + "/films", payload, String.class);
+        }
+    } catch (org.springframework.web.client.HttpClientErrorException e) {
+        System.err.println("Backend Validation Error: " + e.getResponseBodyAsString());
+        throw e;
+    } catch (Exception e) {
+        System.err.println("Save Error: " + e.getMessage());
+        throw e;
     }
+}
 
     // ✅ DELETE (Identify by Short ID)
     public void deleteFilm(Short id) {

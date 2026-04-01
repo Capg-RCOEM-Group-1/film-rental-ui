@@ -1,114 +1,203 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <title>Films</title>
+    <meta charset="UTF-8">
+    <title>Film Inventory</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ✅ Added border styles */
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #f3f4f6;
-            font-weight: 600;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
-
-        tr:hover {
-            background-color: #f9fafb;
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(5px); } 
+            to { opacity: 1; transform: translateY(0); } 
         }
     </style>
 </head>
-<body class="bg-gray-100 p-8">
 
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen p-4 sm:p-8 fade-in">
 
-<h1>Films List</h1>
+    <div class="max-w-full mx-auto">
 
+        <!-- Header -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Film Inventory</h2>
+            <p class="text-gray-500 mt-2 text-sm">Full catalog management including pricing, specs, and cast lists.</p>
+        </div>
 
-<a th:href="@{/films/new}">Add Film</a>
+        <!-- Toolbar -->
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+            <form th:action="@{/films}" method="GET" class="flex flex-wrap w-full lg:w-auto gap-3">
+                <div class="relative w-full sm:w-80">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" name="keyword" th:value="${currentKeyword}"
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                        placeholder="Search films...">
+                </div>
 
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Search</button>
 
-<br><br>
+                <a th:href="@{/films/new}" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700">+ Add Film</a>
 
+                <button type="button" id="toggleUpdateBtn" class="px-4 py-2 bg-yellow-400 rounded-lg text-sm font-medium hover:bg-yellow-500">Update Mode</button>
+                <button type="submit" id="submitUpdateBtn" form="bulkForm" class="hidden px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700" disabled>Edit Selected</button>
 
-<table border="1" cellpadding="10">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Year</th>
-            <th>Length</th>
-            <th>Rating</th>
-            <th>Language</th>
-            <th>Rental Rate</th>        <!-- Header 7 -->
-            <th>Replacement Cost</th>  <!-- Header 8 -->
-            <th>Special Features</th>   <!-- Header 9 -->
-            <th>Actions</th>           <!-- Header 10 -->
-        </tr>
-    </thead>
+                <button type="button" id="toggleDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">Delete Mode</button>
+                <button type="submit" id="submitDeleteBtn" form="bulkForm" th:formaction="@{/films/delete}" formmethod="POST"
+                    class="hidden px-4 py-2 bg-red-800 text-white rounded-lg text-sm font-medium hover:bg-red-900"
+                    disabled onclick="return confirm('Delete selected films?');">Delete Selected</button>
+                
+                <a th:if="${currentKeyword != null}" th:href="@{/films}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50">Clear</a>
+            </form>
+        </div>
 
-    <tbody>
-        <tr th:each="film : ${films}">
-            <td th:text="${film.title}"></td>
-            <td th:text="${film.description}"></td>
-            <td th:text="${film.releaseYear}"></td>
-            <td th:text="${film.length}"></td>
-            <td th:text="${film.rating}"></td>
-            <td th:text="${film.language}"></td>
+        <!-- Main Table Container -->
+        <form id="bulkForm" th:action="@{/films/edit}" method="GET">
+            <div class="bg-white shadow-md rounded-xl border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                            <tr>
+                                <th class="radio-col hidden px-2 py-4 text-center w-8">Sel</th>
+                                <th class="checkbox-col hidden px-2 py-4 text-center w-8"><input type="checkbox" id="selectAllCb"></th>
+                                <th class="px-4 py-4 text-left w-12">#</th>
+                                <th class="px-4 py-4 text-left">Title & Language</th>
+                                <th class="px-4 py-4 text-left">Year/Dur/Len</th>
+                                <th class="px-4 py-4 text-left">Rating</th>
+                                <th class="px-4 py-4 text-left">Rental Details</th>
+                                <th class="px-4 py-4 text-left">Special Features</th>
+                                <th class="px-4 py-4 text-left">Last Update</th>
+                                <th class="px-4 py-4 text-left w-24">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-100">
+                            <tr th:each="film, stat : ${films}" class="hover:bg-blue-50 transition group text-sm">
+                                <td class="radio-col hidden px-2 py-4 text-center">
+                                    <input type="radio" name="filmId" th:value="${film.getIdFromLink()}">
+                                </td>
+                                <td class="checkbox-col hidden px-2 py-4 text-center">
+                                    <input type="checkbox" name="filmIds" th:value="${film.getIdFromLink()}">
+                                </td>
+
+                                <!-- Correct Serial Number Logic -->
+                                <td class="px-4 py-4 font-semibold text-gray-400" 
+                                    th:text="${(pageData != null ? pageData.number * pageData.size : 0) + stat.count}"></td>
+
+                                <td class="px-4 py-4">
+                                    <div class="font-bold text-gray-900 uppercase leading-none" th:text="${film.title}"></div>
+                                    <div class="text-[11px] text-gray-500 line-clamp-1 my-1" th:text="${film.description}"></div>
+                                    <span class="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-600 font-medium" th:text="${film.language}"></span>
+                                </td>
+
+                                <td class="px-4 py-4 whitespace-nowrap text-gray-600">
+                                    <div th:text="${'Year: ' + film.releaseYear}"></div>
+                                    <div class="text-[11px]" th:text="${'Dur: ' + film.rentalDuration + ' days'}"></div>
+                                    <div class="text-[11px]" th:text="${'Len: ' + film.length + ' min'}"></div>
+                                </td>
+
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-bold rounded" th:text="${film.rating}"></span>
+                                </td>
+
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-green-600 font-bold" th:text="${'Rate: $' + film.rentalRate}"></div>
+                                    <div class="text-red-400 text-[10px] font-medium" th:text="${'Replace: $' + film.replacementCost}"></div>
+                                </td>
+
+                                <td class="px-4 py-4">
+                                    <div class="flex flex-wrap gap-1 max-w-[150px]">
+                                        <span th:each="feature : ${film.specialFeatures}" 
+                                              class="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                                              th:text="${feature}"></span>
+                                        <span th:if="${film.specialFeatures == null or #lists.isEmpty(film.specialFeatures)}" class="text-gray-400 italic text-[10px]">None</span>
+                                    </div>
+                                </td>
+
+                                <td class="px-4 py-4 whitespace-nowrap text-[10px] text-gray-400" th:text="${film.lastUpdate}"></td>
+
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <a th:href="@{/films/actors(filmId=${film.getIdFromLink()}, title=${film.title})}" 
+                                       class="inline-flex items-center text-blue-600 font-bold hover:text-blue-900 group">
+                                        Actors 
+                                        <span class="ml-1 transition-transform group-hover:translate-x-1">&rarr;</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+
+        <!-- Dynamic Pagination System -->
+        <div class="mt-6 flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200 shadow-sm" th:if="${pageData != null and pageData.totalPages > 0}">
             
-            <!-- 7. Rental Rate (Matches Header) -->
-            <td th:text="${'$' + film.rentalRate}"></td>
-            
-            <!-- 8. Replacement Cost (Matches Header) -->
-            <td th:text="${'$' + film.replacementCost}"></td>
+            <div>
+                <p class="text-sm text-gray-700">
+                    Showing Page <span class="font-bold text-gray-900" th:text="${pageData.number + 1}"></span> 
+                    of <span class="font-bold text-gray-900" th:text="${pageData.totalPages}"></span>
+                    <span class="text-gray-400 mx-2">|</span>
+                    Total Items: <span class="font-semibold text-gray-900" th:text="${pageData.totalElements}"></span>
+                </p>
+            </div>
 
-            <!-- 9. Special Features (MOVED HERE TO MATCH HEADER) -->
-            <td class="p-3 text-xs italic">
-                <span th:if="${film.specialFeatures != null}"
-                      th:text="${#strings.listJoin(film.specialFeatures, ', ')}">
-                </span>
-                <span th:if="${film.specialFeatures == null}">None</span>
-            </td>
+            <div class="flex gap-2">
+                <!-- Previous Button -->
+                <a th:if="${pageData.number > 0}"
+                   th:href="@{/films(page=${pageData.number - 1}, keyword=${currentKeyword})}"
+                   class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                    &larr; Previous
+                </a>
 
+                <!-- Next Button -->
+                <a th:if="${pageData.number < pageData.totalPages - 1}"
+                   th:href="@{/films(page=${pageData.number + 1}, keyword=${currentKeyword})}"
+                   class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                    Next &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
 
-        <td>
-            <!-- ✅ DELETE -->
-            <a th:href="@{/films/delete/{id}(id=${film.idFromLink})}"
-               onclick="return confirm('Are you sure you want to delete this film?');">
-                Delete
-            </a>
-        </td>
-    </tr>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleUpdateBtn = document.getElementById('toggleUpdateBtn');
+            const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
+            const submitUpdateBtn = document.getElementById('submitUpdateBtn');
+            const submitDeleteBtn = document.getElementById('submitDeleteBtn');
+            const radCols = document.querySelectorAll('.radio-col');
+            const checkCols = document.querySelectorAll('.checkbox-col');
 
+            toggleUpdateBtn.addEventListener('click', () => {
+                radCols.forEach(c => c.classList.toggle('hidden'));
+                submitUpdateBtn.classList.toggle('hidden');
+                checkCols.forEach(c => c.classList.add('hidden'));
+                submitDeleteBtn.classList.add('hidden');
+            });
 
-</table>
+            toggleDeleteBtn.addEventListener('click', () => {
+                checkCols.forEach(c => c.classList.toggle('hidden'));
+                submitDeleteBtn.classList.toggle('hidden');
+                radCols.forEach(c => c.classList.add('hidden'));
+                submitUpdateBtn.classList.add('hidden');
+            });
 
+            document.addEventListener('change', () => {
+                submitUpdateBtn.disabled = !document.querySelector('input[name="filmId"]:checked');
+                submitDeleteBtn.disabled = !document.querySelector('input[name="filmIds"]:checked');
+            });
 
+            const selectAll = document.getElementById('selectAllCb');
+            if(selectAll){
+                selectAll.addEventListener('change', (e) => {
+                    document.querySelectorAll('input[name="filmIds"]').forEach(cb => cb.checked = e.target.checked);
+                    submitDeleteBtn.disabled = !document.querySelector('input[name="filmIds"]:checked');
+                });
+            }
+        });
+    </script>
 </body>
 </html>
