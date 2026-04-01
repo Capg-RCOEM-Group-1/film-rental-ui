@@ -1,8 +1,6 @@
 package com.rcoem.filmrentalui.service;
 
-import com.rcoem.filmrentalui.dto.CustomerPageResponse;
-import com.rcoem.filmrentalui.dto.FilmDTO;
-import com.rcoem.filmrentalui.dto.FilmResponse;
+import com.rcoem.filmrentalui.dto.*;
 
 import java.util.List;
 
@@ -62,6 +60,16 @@ public class ExternalApiService {
         restTemplate.delete(baseUrl + "/films/" + id);
     }
 
+    //Language Backend End points
+    public LanguageResponse getAllLanguage(int page, int size){
+        String url = baseUrl + "/languages?page="+page+"size="+size;
+        return restTemplate.getForObject(url,LanguageResponse.class);
+    }
+
+   public FilmResponse getFilms(int page, int size, int id, String name){
+        String url = baseUrl+"/flims/search/findByLanguage_Id?page="+page+"&size="+size+"&id="+id+"&projection=filmView";
+        return restTemplate.getForObject(url,FilmResponse.class);
+   }
 
 
 }
