@@ -5,9 +5,14 @@ import java.util.List;
 public class FilmResponse {
 
     private Embedded _embedded;
+    private PageData page;
 
     public Embedded get_embedded() {
         return _embedded;
+    }
+
+    public PageData getPage() {
+        return page;
     }
 
     public void set_embedded(Embedded _embedded) {

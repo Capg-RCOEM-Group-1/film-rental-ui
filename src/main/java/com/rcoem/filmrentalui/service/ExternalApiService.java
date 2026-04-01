@@ -6,6 +6,7 @@ import com.rcoem.filmrentalui.dto.FilmResponse;
 
 import java.util.List;
 
+import com.rcoem.filmrentalui.dto.StorePageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -63,5 +64,28 @@ public class ExternalApiService {
     }
 
 
+    //-------------------------------------------- Store Services ------------------------------------------------------
+    // ✅ GET ALL STORES (Paginated)
+    public StorePageResponse getStores(int page, int size) {
+        // REMOVED leading slash before 'stores' to prevent double slashes
+        String url = String.format("%sstores?projection=storeSummary&page=%d&size=%d", baseUrl, page, size);
+        return restTemplate.getForObject(url, StorePageResponse.class);
+    }
+
+    // ✅ GET FILMS BY STORE ID
+    public FilmResponse getFilmsByStore(Byte storeId, int page, int size) {
+        // REMOVED leading slash before 'stores'
+        String url = String.format("%sstores/%d/inventories?projection=inventoryFilm&page=%d&size=%d",
+                baseUrl, storeId, page, size);
+        return restTemplate.getForObject(url, FilmResponse.class);
+    }
+
+    // ✅ DELETE STORE
+    public void deleteStore(Byte id) {
+        // REMOVED leading slash
+        restTemplate.delete(baseUrl + "stores/" + id);
+    }
+
+    //------------------------------------------------------------------------------------------------------------------
 
 }
