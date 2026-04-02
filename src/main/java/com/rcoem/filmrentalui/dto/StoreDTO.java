@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CustomerStoreDTO {
+public class StoreDTO {
     private Short storeId; // Still needed for your Java logic
     private String address;
     private String city;

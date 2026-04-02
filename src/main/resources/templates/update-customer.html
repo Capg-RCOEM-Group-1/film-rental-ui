@@ -2,59 +2,37 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Update Customer</title>
+  <title>Cine Rentals | Relocate</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-attachment: fixed; }
+    .blur-layer { backdrop-filter: blur(8px); background: rgba(15, 23, 42, 0.7); min-height: 100vh; }
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); }
+  </style>
 </head>
-<body class="bg-gray-50 p-8 flex justify-center items-start pt-10">
+<body class="text-slate-900 font-sans antialiased">
+<div class="blur-layer flex items-center justify-center p-6">
+  <div class="glass-card max-w-xl w-full p-12 rounded-[3rem] shadow-2xl border border-white/20">
+    <div class="mb-10 text-center">
+      <h2 class="text-3xl font-black text-slate-900 uppercase italic tracking-tighter">Relocate Store <span class="text-rose-600">#<span th:text="${storeId}"></span></span></h2>
+      <p class="text-slate-500 mt-2 font-bold text-[10px] uppercase tracking-widest">Select a new operating address for this branch</p>
+    </div>
 
-<div class="max-w-2xl w-full bg-white shadow-md rounded-xl border border-gray-200 overflow-hidden">
-  <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between">
-    <h2 class="text-xl font-bold">Update Customer</h2>
-    <a href="/ekansh/customers" class="text-gray-400 hover:text-gray-600">✕</a>
+    <form th:action="@{/ameya/stores/update-address}" method="POST" class="space-y-8">
+      <input type="hidden" name="storeId" th:value="${storeId}">
+      <div>
+        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-2">Available Locations</label>
+        <select name="addressId" class="w-full bg-slate-50 border border-slate-200 text-slate-900 p-5 rounded-3xl outline-none focus:ring-2 focus:ring-rose-500 font-bold appearance-none" required>
+          <option value="" disabled selected>Pick a new address...</option>
+          <option th:each="addr : ${addresses}" th:value="${addr.addressId}" th:text="${addr.address}"></option>
+        </select>
+      </div>
+      <div class="flex flex-col gap-4 pt-4">
+        <button type="submit" class="w-full bg-rose-600 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-rose-700 transition shadow-lg">Confirm Relocation</button>
+        <a href="/ameya/stores" class="text-center text-slate-400 hover:text-slate-900 font-bold text-[10px] transition uppercase tracking-widest">Back</a>
+      </div>
+    </form>
   </div>
-
-  <form th:action="@{/ekansh/customers/edit}" th:object="${customerForm}" method="POST" class="p-6">
-    <input type="hidden" th:field="*{customerId}">
-    
-    <div class="grid grid-cols-2 gap-6 mb-6">
-
-      <div>
-        <label class="block text-sm font-medium mb-1">First Name *</label>
-        <input type="text" th:field="*{firstName}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-1">Last Name *</label>
-        <input type="text" th:field="*{lastName}" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-      </div>
-
-      <div class="col-span-2">
-        <label class="block text-sm font-medium mb-1">Email Address</label>
-        <input type="email" th:field="*{email}" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-1">Assigned Store *</label>
-        <select th:field="*{storeId}" required class="w-full px-3 py-2 border rounded-lg bg-white">
-          <option value="" disabled selected>Select a store...</option>
-          <option th:each="store : ${stores}" th:value="${store.storeId}" th:text="${store.fullDisplay}"></option>
-        </select>
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-1">Customer Address *</label>
-        <select th:field="*{addressId}" required class="w-full px-3 py-2 border rounded-lg bg-white">
-          <option value="" disabled selected>Select an address...</option>
-          <option th:each="address : ${addresses}" th:value="${address.addressId}" th:text="${address.fullDisplay}"></option>
-        </select>
-      </div>
-    </div>
-
-    <div class="flex justify-end gap-3 pt-4 border-t">
-      <a href="/ekansh/customers" class="px-4 py-2 border rounded-lg text-sm">Cancel</a>
-      <button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm hover:bg-yellow-600">Update Customer</button>
-    </div>
-  </form>
 </div>
 </body>
 </html>

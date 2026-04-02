@@ -4,11 +4,11 @@ import com.rcoem.filmrentalui.dto.*;
 
 import java.util.List;
 
-import com.rcoem.filmrentalui.dto.StorePageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class ExternalApiService {
@@ -40,19 +40,6 @@ public class ExternalApiService {
         return restTemplate.getForObject(url, CustomerPageResponse.class);
     }
 
-
-    public List<CustomerStoreDTO> getAllStores() {
-        // Add the projection parameter to the URL!
-        String url = this.baseUrl + "stores?projection=storeInfo";
-
-        try {
-            CustomerStoreListResponse response = restTemplate.getForObject(url, CustomerStoreListResponse.class);
-            return response != null && response.getEmbedded() != null ? response.getEmbedded().getStores() : null;
-        } catch (Exception e) {
-            System.err.println("Failed to fetch stores: " + e.getMessage());
-            return null;
-        }
-    }
 
     public List<CustomerAddressDTO> getAllAddresses() {
         // Use a placeholder {size} in the URL
@@ -159,26 +146,113 @@ public class ExternalApiService {
 
 
     //-------------------------------------------- Store Services ------------------------------------------------------
-    // ✅ GET ALL STORES (Paginated)
-    public StorePageResponse getStores(int page, int size) {
-        // REMOVED leading slash before 'stores' to prevent double slashes
-        String url = String.format("%sstores?projection=storeSummary&page=%d&size=%d", baseUrl, page, size);
-        return restTemplate.getForObject(url, StorePageResponse.class);
+
+    public List<StoreDTO> getAllStores() {
+        String url = this.baseUrl + "stores?projection=storeInfo";
+
+        try {
+            StoreListResponse response = restTemplate.getForObject(url, StoreListResponse.class);
+            return response != null && response.getEmbedded() != null ? response.getEmbedded().getStores() : null;
+        } catch (Exception e) {
+            System.err.println("Failed to fetch stores: " + e.getMessage());
+            return null;
+        }
     }
 
-    // ✅ GET FILMS BY STORE ID
-    public FilmResponse getFilmsByStore(Byte storeId, int page, int size) {
-        // REMOVED leading slash before 'stores'
-        String url = String.format("%sstores/%d/inventories?projection=inventoryFilm&page=%d&size=%d",
-                baseUrl, storeId, page, size);
-        return restTemplate.getForObject(url, FilmResponse.class);
+    public List<StoreDTO> searchStores(String keyword, int page, int size) {
+        // 1. Build the URL using fromUriString to avoid compilation errors
+        // 2. We use .encode() to handle spaces in addresses (e.g., "47 MySakila Drive")
+        String url = UriComponentsBuilder.fromUriString(this.baseUrl + "stores/search/findStoresByKeyword")
+                .queryParam("keyword", keyword)
+                .queryParam("page", page)
+                .queryParam("size", size)
+                .encode()
+                .toUriString();
+
+        try {
+            // Log the URL to your IDE console so you can test it in a browser if it fails
+            System.out.println("DEBUG: Searching stores at: " + url);
+
+            // Map the complex JSON structure to our response DTO
+            StoreListResponse response = restTemplate.getForObject(url, StoreListResponse.class);
+
+            // Extract the list from the _embedded wrapper
+            if (response != null && response.getStores() != null) {
+                return response.getStores();
+            }
+
+            return java.util.Collections.emptyList();
+
+        } catch (Exception e) {
+            // Log the specific error (e.g., 404 if the method name is wrong on the backend)
+            System.err.println("API Error during store search: " + e.getMessage());
+            return java.util.Collections.emptyList();
+        }
     }
 
-    // ✅ DELETE STORE
-    public void deleteStore(Byte id) {
-        // REMOVED leading slash
-        restTemplate.delete(baseUrl + "stores/" + id);
+
+    public List<java.util.Map<String, Object>> getAllStaff() {
+        String url = this.baseUrl + "staff";
+        try {
+            java.util.Map<String, Object> response = restTemplate.getForObject(url, java.util.Map.class);
+            if (response != null && response.containsKey("_embedded")) {
+                java.util.Map<String, Object> embedded = (java.util.Map<String, Object>) response.get("_embedded");
+                return (List<java.util.Map<String, Object>>) embedded.get("staff");
+            }
+        } catch (Exception e) {
+            System.err.println("Staff fetch failed: " + e.getMessage());
+        }
+        return java.util.Collections.emptyList();
     }
+
+    public void createStore(StoreFormDTO formDTO) {
+        java.util.Map<String, Object> payload = new java.util.HashMap<>();
+
+        // Spring Data REST requires the full URI for associations
+        payload.put("address", this.baseUrl + "addresses/" + formDTO.getAddressId());
+        payload.put("manager", this.baseUrl + "staff/" + formDTO.getManagerStaffId());
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+
+        org.springframework.http.HttpEntity<java.util.Map<String, Object>> request =
+                new org.springframework.http.HttpEntity<>(payload, headers);
+
+        restTemplate.postForObject(this.baseUrl + "stores", request, String.class);
+    }
+
+
+    public List<InventoryResponse.InventoryItem> getInventoriesByStore(Byte storeId) {
+        // 1. Clean the base URL to prevent double slashes
+        String cleanBase = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+
+        // 2. Build the store URI (The backend needs this full link as a parameter)
+        String storeUri = cleanBase + "/stores/" + storeId;
+
+        // 3. Build the search URL
+        String searchUrl = UriComponentsBuilder.fromUriString(cleanBase + "/inventories/search/findByStore")
+                .queryParam("store", storeUri)
+                .toUriString();
+
+        try {
+            // CHECK YOUR INTELLIJ CONSOLE FOR THIS PRINT!
+            System.out.println("UI Calling URL: " + searchUrl);
+
+            InventoryResponse response = restTemplate.getForObject(searchUrl, InventoryResponse.class);
+
+            if (response != null && response.getEmbedded() != null) {
+                return response.getEmbedded().getInventories();
+            }
+            return java.util.Collections.emptyList();
+        } catch (Exception e) {
+            // If there's a mapping error with FilmDTO, it will show up here
+            System.err.println("API/Mapping Error: " + e.getMessage());
+            e.printStackTrace();
+            return java.util.Collections.emptyList();
+        }
+    }
+
+
 
     //------------------------------------------------------------------------------------------------------------------
 
