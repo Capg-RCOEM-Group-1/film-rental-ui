@@ -2,7 +2,7 @@ name: Build and Test Spring Boot App
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main","work2" ]
   pull_request:
     branches: [ "main" ]
 
