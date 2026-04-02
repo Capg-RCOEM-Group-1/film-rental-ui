@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Rentals - FilmFlix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(5px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        body { background-color: #141414; color: white; }
+        .bg-netflix { background-color: #E50914; }
+        .text-netflix { color: #E50914; }
+        .nav-link { transition: color 0.2s; }
+        .nav-link:hover { color: #b3b3b3; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+</head>
+
+<body class="font-sans antialiased min-h-screen fade-in flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="flex justify-between items-center px-4 md:px-12 py-4 bg-black w-full z-10 sticky top-0 border-b border-gray-800">
+        <div class="flex items-center gap-8">
+            <a href="/" class="text-3xl font-bold text-netflix tracking-tighter">FILM<span class="text-white">FLIX</span></a>
+            <div class="hidden md:flex gap-6 mt-1 text-sm font-semibold">
+                <a href="/" class="text-gray-300 nav-link">Home</a>
+                <a href="/films" class="text-gray-300 nav-link">Films</a>
+                <a href="/categories" class="text-gray-300 nav-link">Categories</a>
+                <a href="/customers" class="text-white nav-link">Customers</a>
+                <a href="/staff" class="text-gray-300 nav-link">Staff</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto p-4 sm:p-8 flex-grow w-full">
+
+        <div class="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+                <h2 id="page-title" class="text-3xl font-extrabold text-white tracking-tight">Rental Details</h2>
+                <p class="text-gray-400 mt-2 text-sm">View film rental history for this specific customer.</p>
+            </div>
+            <a href="/ekansh/customers"
+                class="inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-900 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800 transition duration-150">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Customers
+            </a>
+        </div>
+
+        <div class="bg-black shadow-2xl rounded-xl border border-gray-800 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-800">
+                    <thead class="bg-gray-900">
+                        <tr>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider w-20">
+                                Sr No</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Film Name</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Price Paid</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Rental Date</th>
+                            <th scope="col"
+                                class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                Return Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rentals-table-body" class="divide-y divide-gray-800 bg-black">
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-gray-500" id="loading-text">
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-netflix inline-block"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                                Loading rentals...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4" id="pagination-container"
+            style="display: none;">
+            <div
+                class="w-full flex items-center justify-between p-2">
+                <div id="page-info" class="text-sm text-gray-400"></div>
+                <div class="flex gap-2" id="pagination-controls"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-gray-600 border-t border-gray-900 mt-auto bg-black">
+        <p class="text-xs">&copy; 2026 FilmFlix Management System.</p>
+    </footer>
+
+    <script>
+        const PAGE_SIZE = 10;
+        let globalCustomerId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            globalCustomerId = urlParams.get('customerId');
+            const customerName = urlParams.get('name');
+
+            if (customerName) {
+                document.getElementById('page-title').innerHTML = `Rental Details for <span class="text-netflix">${customerName}</span>`;
+            }
+
+            if (globalCustomerId) {
+                fetchRentals(0);
+            } else {
+                document.getElementById('loading-text').innerHTML = `
+                <div class="text-netflix font-bold">Error: No Customer ID provided in URL.</div>
+            `;
+            }
+        });
+
+        async function fetchRentals(pageNumber) {
+            try {
+                // Proxied via your Spring Boot UI server to gracefully handle any CORS issues!
+                const apiUrl = `/ekansh/api/rentals?customerId=${globalCustomerId}&page=${pageNumber}&size=${PAGE_SIZE}`;
+
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                    throw new Error("HTTP connection failed");
+                }
+
+                const data = await response.json();
+                const tbody = document.getElementById('rentals-table-body');
+                tbody.innerHTML = '';
+
+                const rentals = data._embedded ? data._embedded.customerRentalViews : [];
+                const pageData = data.page;
+
+                document.getElementById('pagination-container').style.display = 'flex';
+
+                if (rentals.length === 0) {
+                    tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            <h3 class="text-sm font-bold text-gray-400">No rentals found</h3>
+                            <p class="mt-1 text-sm text-gray-600">This customer hasn't rented anything yet.</p>
+                        </td>
+                    </tr>`;
+                    updatePaginationUI(null);
+                    return;
+                }
+
+                rentals.forEach((rental, index) => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-900 transition duration-150 ease-in-out group';
+
+                    const srNo = (pageData.number * pageData.size) + index + 1;
+                    const rDate = rental.rentalDate ? new Date(rental.rentalDate).toLocaleString() : 'N/A';
+
+                    let retDate = 'Not Returned Yet';
+                    let retClass = 'text-yellow-500 font-bold bg-yellow-900/30 border border-yellow-800 px-2.5 py-1 rounded text-xs';
+
+                    if (rental.returnDate) {
+                        retDate = new Date(rental.returnDate).toLocaleString();
+                        retClass = 'text-gray-400 font-medium';
+                    }
+
+                    const priceFormatted = rental.price ? `$${rental.price.toFixed(2)}` : '$0.00';
+
+                    tr.innerHTML = `
+                        <td class="px-6 py-5 whitespace-nowrap text-sm font-bold text-gray-500">${srNo}</td>
+                        <td class="px-6 py-5 whitespace-nowrap text-sm font-bold text-white">${rental.filmName}</td>
+                        <td class="px-6 py-5 whitespace-nowrap text-sm font-medium text-green-500">${priceFormatted}</td>
+                        <td class="px-6 py-5 whitespace-nowrap text-sm text-gray-400">${rDate}</td>
+                        <td class="px-6 py-5 whitespace-nowrap">
+                            <span class="${retClass}">${retDate}</span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                updatePaginationUI(pageData);
+
+            } catch (error) {
+                console.error("Error fetching rentals:", error);
+                document.getElementById('rentals-table-body').innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-netflix font-medium">
+                        Failed to load rental data. Ensure backend is running.
+                    </td>
+                </tr>`;
+            }
+        }
+
+        function updatePaginationUI(pageData) {
+            const controlsDiv = document.getElementById('pagination-controls');
+            const infoDiv = document.getElementById('page-info');
+
+            if (!pageData) {
+                controlsDiv.innerHTML = '';
+                infoDiv.innerHTML = '';
+                return;
+            }
+
+            const currentPage = pageData.number;
+            const totalPages = pageData.totalPages;
+
+            infoDiv.innerHTML = `Showing page <span class="font-bold text-white">${currentPage + 1}</span> of <span class="font-bold text-white">${totalPages}</span> <span class="text-gray-600 mx-1">|</span> Total: <span class="font-bold text-white">${pageData.totalElements}</span> rentals`;
+
+            let buttonsHtml = '';
+            const btnClass = "relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-lg text-white bg-black hover:bg-gray-800 transition shadow-sm";
+            const disabledClass = "relative inline-flex items-center px-4 py-2 border border-gray-800 text-sm font-medium rounded-lg text-gray-600 bg-black cursor-not-allowed hidden sm:inline-flex";
+
+            if (currentPage > 0) {
+                buttonsHtml += `<button class="${btnClass}" onclick="fetchRentals(${currentPage - 1})">Previous</button>`;
+            } else {
+                buttonsHtml += `<button class="${disabledClass}" disabled>Previous</button>`;
+            }
+
+            if (currentPage < totalPages - 1) {
+                buttonsHtml += `<button class="${btnClass}" onclick="fetchRentals(${currentPage + 1})">Next</button>`;
+            } else {
+                buttonsHtml += `<button class="${disabledClass}" disabled>Next</button>`;
+            }
+
+            controlsDiv.innerHTML = buttonsHtml;
+        }
+    </script>
+</body>
+
+</html>

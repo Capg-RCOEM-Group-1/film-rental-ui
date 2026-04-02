@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Management - FilmFlix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(5px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        body { background-color: #141414; color: white; }
+        .bg-netflix { background-color: #E50914; }
+        .hover-bg-netflix:hover { background-color: #f40612; }
+        .text-netflix { color: #E50914; }
+        .nav-link { transition: color 0.2s; }
+        .nav-link:hover { color: #b3b3b3; }
+        
+        /* Custom scrollbar for dark theme */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen fade-in flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="flex justify-between items-center px-4 md:px-12 py-4 bg-black w-full z-10 sticky top-0 border-b border-gray-800">
+        <div class="flex items-center gap-8">
+            <a href="/" class="text-3xl font-bold text-netflix tracking-tighter">FILM<span class="text-white">FLIX</span></a>
+            <div class="hidden md:flex gap-6 mt-1 text-sm font-semibold">
+                <a href="/" class="text-gray-300 nav-link">Home</a>
+                <a href="/films" class="text-gray-300 nav-link">Films</a>
+                <a href="/categories" class="text-gray-300 nav-link">Categories</a>
+                <a href="/customers" class="text-gray-300 nav-link">Customers</a>
+                <a href="/staff" class="text-white nav-link">Staff</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto p-4 sm:p-8 flex-grow w-full">
+
+        <!-- Header -->
+        <div class="mb-8 text-center sm:text-left flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h2 class="text-3xl font-extrabold text-white tracking-tight text-netflix">Staff Directory</h2>
+                <p class="text-gray-400 mt-2 text-sm">Manage employees, view payments, and update statuses.</p>
+            </div>
+            <a th:href="@{/aditya/staff/add}" class="px-4 py-2 bg-white text-black bg-opacity-90 rounded-lg text-sm font-bold hover:bg-gray-200 transition flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Add New Staff
+            </a>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            
+            <form th:action="@{/aditya/staff/search}" method="get" class="flex w-full md:w-auto gap-2">
+                <input type="text" name="searchTerm" th:value="${currentSearch}" placeholder="Search name, email, or username..." 
+                    class="w-full md:w-80 px-4 py-2 border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-[#E50914] focus:border-transparent text-sm" />
+                <button type="submit" class="px-4 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition">Search</button>
+            </form>
+
+            <div class="flex bg-gray-900 border border-gray-700 rounded-lg overflow-hidden">
+                <a th:href="@{/aditya/staff(active=true)}" class="px-4 py-2 text-sm font-medium text-green-500 hover:bg-gray-800 border-r border-gray-700 transition">Active</a>
+                <a th:href="@{/aditya/staff(active=false)}" class="px-4 py-2 text-sm font-medium text-red-500 hover:bg-gray-800 border-r border-gray-700 transition">Inactive</a>
+                <a th:href="@{/aditya/staff}" class="px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 transition">All</a>
+            </div>
+
+        </div>
+
+        <!-- Table Card -->
+        <div class="bg-black shadow-lg rounded-xl border border-gray-800 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-800">
+                    <thead class="bg-gray-900 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <tr>
+                            <th class="px-6 py-4 text-left">Username</th>
+                            <th class="px-6 py-4 text-left">Full Name</th>
+                            <th class="px-6 py-4 text-left">Email</th>
+                            <th class="px-6 py-4 text-left">Status</th>
+                            <th class="px-6 py-4 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-black divide-y divide-gray-800">
+                        <tr th:each="staff : ${staffResponse.embedded.staffs}" class="hover:bg-gray-900 transition duration-200 group text-sm">
+                            <td class="px-6 py-4 font-bold text-white tracking-wider" th:text="${staff.username}">Username</td>
+                            <td class="px-6 py-4 text-gray-300" th:text="${staff.firstName + ' ' + staff.lastName}">Name</td>
+                            <td class="px-6 py-4 text-gray-400" th:text="${staff.email}">Email</td>
+                            <td class="px-6 py-4">
+                                <span th:class="${staff.active} ? 'px-2 py-1 bg-green-900/30 text-green-500 border border-green-800 text-xs rounded font-medium' : 'px-2 py-1 bg-red-900/30 text-red-500 border border-red-800 text-xs rounded font-medium'"
+                                      th:text="${staff.active} ? 'Active' : 'Inactive'">
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 flex flex-wrap gap-2">
+                                <a th:href="@{/aditya/staff/payments(username=${staff.username},staffName=${staff.firstName + ' ' + staff.lastName})}" class="px-3 py-1 bg-gray-800 text-blue-400 border border-gray-700 rounded text-xs hover:bg-gray-700 transition">Payments</a>
+                                <a th:href="@{/aditya/staff/edit/{id}(id=${staff.staffId})}" class="px-3 py-1 bg-gray-800 text-yellow-500 border border-gray-700 rounded text-xs hover:bg-gray-700 transition">Edit</a>
+                                <a th:href="@{/aditya/staff/delete/{id}(id=${staff.staffId})}" class="px-3 py-1 bg-netflix text-white rounded text-xs hover:bg-red-700 transition" onclick="return confirm('Are you sure?')">Deactive</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(staffResponse.embedded.staffs)}">
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                No staff members found.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-6 flex justify-center" th:if="${staffResponse.page != null and staffResponse.page.totalPages > 1}">
+            <nav class="flex gap-2 items-center">
+                <a th:if="${staffResponse.page.number > 0}"
+                   th:href="@{/aditya/staff(page=${staffResponse.page.number - 1}, searchTerm=${currentSearch}, active=${currentActive})}"
+                   class="px-3 py-1 border border-gray-700 rounded text-sm font-medium bg-black text-white hover:bg-gray-800 transition">
+                    &larr; Prev
+                </a>
+                
+                <span class="px-3 py-1 text-sm font-bold text-white bg-gray-800 rounded border border-gray-700">
+                    Page <span th:text="${staffResponse.page.number + 1}"></span> of <span th:text="${staffResponse.page.totalPages}"></span>
+                </span>
+
+                <a th:if="${staffResponse.page.number + 1 < staffResponse.page.totalPages}"
+                   th:href="@{/aditya/staff(page=${staffResponse.page.number + 1}, searchTerm=${currentSearch}, active=${currentActive})}"
+                   class="px-3 py-1 border border-gray-700 rounded text-sm font-medium bg-black text-white hover:bg-gray-800 transition">
+                    Next &rarr;
+                </a>
+            </nav>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-gray-600 border-t border-gray-900 mt-auto bg-black">
+        <p class="text-xs">&copy; 2026 FilmFlix Management System.</p>
+    </footer>
+
+</body>
+</html>
