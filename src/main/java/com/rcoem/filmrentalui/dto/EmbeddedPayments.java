@@ -8,5 +8,5 @@ import java.util.List;
 @Getter
 @Setter
 public class EmbeddedPayments {
-    private List<PaymentSummaryDTO> payments;
+    private List<DailyPaymentSummary> payments;
 }

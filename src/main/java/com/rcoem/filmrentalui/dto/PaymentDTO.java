@@ -1,18 +1,13 @@
 package com.rcoem.filmrentalui.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
+@Data
 public class PaymentDTO {
+    private Short paymentId;
     private BigDecimal amount;
-    private LocalDateTime paymentDate;
+    private String paymentDate; // Keep as String to handle split/formatting easily in JS
+    private String customerName; 
 }

@@ -2,8 +2,10 @@ package com.rcoem.filmrentalui.service;
 
 import com.rcoem.filmrentalui.dto.*;
 
-import java.time.LocalDateTime;
+// import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+// import java.util.List;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -380,4 +382,48 @@ public void saveOrUpdateFilm(FilmDTO film, String selectedLanguageId) {
         String url = this.baseUrl + "films/search/findByLanguage_IdAndTitleContainingIgnoreCase?id=" + id + "&page=" + page + "&size="+ size +"&title="+title;
         return restTemplate.getForObject(url, FilmResponse.class);
     }
+
+
+
+    // ... Existing code ...
+
+    public List<DailyPaymentDTO> getDailyPaymentTotals(Byte storeId) {
+        // Note: If you have a custom controller for daily-totals, keep this. 
+        // If it's a Repository method, it should follow the /search/ path.
+        String url = baseUrl + "/payments/search/daily-totals?storeId=" + storeId;
+        DailyPaymentDTO[] arr = restTemplate.getForObject(url, DailyPaymentDTO[].class);
+        return arr != null ? Arrays.asList(arr) : new ArrayList<>();
+    }
+
+    public List<PaymentDTO> getPaymentsByStore(Byte storeId) {
+        // Must include /search/ and the projection name
+        String url = baseUrl + "/payments/search/byStore?storeId=" + storeId + "&projection=paymentSummary";
+        
+        try {
+            // Spring Data REST returns a PaymentResponse object, not a raw Array
+            PaymentResponse response = restTemplate.getForObject(url, PaymentResponse.class);
+            return (response != null && response.getEmbedded() != null) 
+                    ? response.getEmbedded().getPayments() 
+                    : new java.util.ArrayList<>();
+        } catch (Exception e) {
+            return new java.util.ArrayList<>();
+        }
+    }
+
+    public List<PaymentDTO> getPaymentsByStoreAndDate(Byte storeId, String paymentDate) {
+        // Use the path 'byStoreAndDate' defined in your Repository @RestResource
+        String url = baseUrl + "/payments/search/byStoreAndDate?storeId=" + storeId + "&date=" + paymentDate + "&projection=paymentSummary";
+        
+        try {
+            PaymentResponse response = restTemplate.getForObject(url, PaymentResponse.class);
+            return (response != null && response.getEmbedded() != null) 
+                    ? response.getEmbedded().getPayments() 
+                    : new java.util.ArrayList<>();
+        } catch (Exception e) {
+            return new java.util.ArrayList<>();
+        }
+    }
 }
+
+
+
