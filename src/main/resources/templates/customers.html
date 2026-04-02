@@ -1,36 +1,81 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Customer Directory - FilmFlix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(5px); } 
-            to { opacity: 1; transform: translateY(0); } 
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
         }
-        body { background-color: #141414; color: white; }
-        .bg-netflix { background-color: #E50914; }
-        .hover-bg-netflix:hover { background-color: #f40612; }
-        .text-netflix { color: #E50914; }
-        .nav-link { transition: color 0.2s; }
-        .nav-link:hover { color: #b3b3b3; }
-        
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        body {
+            background-color: #141414;
+            color: white;
+        }
+
+        .bg-netflix {
+            background-color: #E50914;
+        }
+
+        .hover-bg-netflix:hover {
+            background-color: #f40612;
+        }
+
+        .text-netflix {
+            color: #E50914;
+        }
+
+        .nav-link {
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #b3b3b3;
+        }
+
         /* Custom scrollbar for dark theme */
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-track { background: #141414; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #141414;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
     </style>
 </head>
 
 <body class="font-sans antialiased min-h-screen fade-in flex flex-col">
 
     <!-- Navbar -->
-    <nav class="flex justify-between items-center px-4 md:px-12 py-4 bg-black w-full z-10 sticky top-0 border-b border-gray-800">
+    <nav
+        class="flex justify-between items-center px-4 md:px-12 py-4 bg-black w-full z-10 sticky top-0 border-b border-gray-800">
         <div class="flex items-center gap-8">
-            <a href="/" class="text-3xl font-bold text-netflix tracking-tighter">FILM<span class="text-white">FLIX</span></a>
+            <a href="/" class="text-3xl font-bold text-netflix tracking-tighter">FILM<span
+                    class="text-white">FLIX</span></a>
             <div class="hidden md:flex gap-6 mt-1 text-sm font-semibold">
                 <a href="/" class="text-gray-300 nav-link">Home</a>
                 <a href="/films" class="text-gray-300 nav-link">Films</a>
@@ -74,16 +119,18 @@
 
                 <a href="/ekansh/customers/new"
                     class="px-4 py-2 bg-white text-black bg-opacity-90 rounded-lg text-sm font-bold hover:bg-gray-200 transition flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
                     Add Customer
                 </a>
 
                 <button type="button" id="toggleUpdateBtn"
-                    class="px-4 py-2 border border-gray-700 text-white rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 transition flex items-center">
+                    class="px-4 py-2 bg-transparent border border-yellow-500 text-yellow-500 rounded-lg text-sm font-medium hover:bg-yellow-500 hover:text-black transition flex items-center">
                     Select to Edit
                 </button>
                 <button type="submit" id="submitUpdateBtn" form="updateForm"
-                    class="hidden px-4 py-2 bg-white text-black font-bold rounded-lg text-sm hover:bg-gray-200 transition disabled:opacity-50"
+                    class="hidden px-4 py-2 bg-yellow-500 text-black font-bold rounded-lg text-sm hover:bg-yellow-600 transition disabled:opacity-50"
                     disabled>
                     Edit Selected
                 </button>
@@ -105,7 +152,9 @@
             <div class="flex">
                 <div class="flex-shrink-0">
                     <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clip-rule="evenodd" />
                     </svg>
                 </div>
                 <div class="ml-3">
@@ -114,7 +163,8 @@
             </div>
         </div>
 
-        <div th:if="${successMessage}" class="bg-green-900 border-l-4 border-green-500 p-4 mb-6 rounded-r-lg text-green-200 fade-in">
+        <div th:if="${successMessage}"
+            class="bg-green-900 border-l-4 border-green-500 p-4 mb-6 rounded-r-lg text-green-200 fade-in">
             <p class="text-sm font-medium" th:text="${successMessage}"></p>
         </div>
 
@@ -124,55 +174,73 @@
                     <table class="min-w-full divide-y divide-gray-800">
                         <thead class="bg-gray-900">
                             <tr>
-                                <th scope="col" class="radio-col hidden px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider w-12">
+                                <th scope="col"
+                                    class="radio-col hidden px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider w-12">
                                     Sel
                                 </th>
-                                <th scope="col" class="checkbox-col hidden px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider w-12">
-                                    <input type="checkbox" id="selectAllCb" class="bg-gray-800 border-gray-700 rounded text-netflix cursor-pointer">
+                                <th scope="col"
+                                    class="checkbox-col hidden px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider w-12">
+                                    <input type="checkbox" id="selectAllCb"
+                                        class="bg-gray-800 border-gray-700 rounded text-netflix cursor-pointer">
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-16">
+                                <th scope="col"
+                                    class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-16">
                                     #
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                                     Name
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                                     Email
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                                <th scope="col"
+                                    class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                                     Address
                                 </th>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-32">
+                                <th scope="col"
+                                    class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-32">
                                     Action
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="bg-black divide-y divide-gray-800">
 
-                            <tr th:each="customer, stat : ${customers}" class="hover:bg-gray-900 transition duration-200 group">
+                            <tr th:each="customer, stat : ${customers}"
+                                class="hover:bg-gray-900 transition duration-200 group">
                                 <td class="radio-col hidden px-6 py-4 text-center">
-                                    <input type="radio" name="customerId" th:value="${customer.customerId}" class="customer-radio bg-gray-800 border-gray-700 cursor-pointer">
+                                    <input type="radio" name="customerId" th:value="${customer.customerId}"
+                                        class="customer-radio bg-gray-800 border-gray-700 cursor-pointer">
                                 </td>
                                 <td class="checkbox-col hidden px-6 py-4 text-center">
-                                    <input type="checkbox" name="customerIds" th:value="${customer.customerId}" class="customer-checkbox bg-gray-800 border-gray-700 rounded text-netflix focus:ring-netflix cursor-pointer">
+                                    <input type="checkbox" name="customerIds" th:value="${customer.customerId}"
+                                        class="customer-checkbox bg-gray-800 border-gray-700 rounded text-netflix focus:ring-netflix cursor-pointer">
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-semibold text-gray-500" th:text="${(pageData != null ? pageData.number * pageData.size : 0) + stat.count}"></div>
+                                    <div class="text-sm font-semibold text-gray-500"
+                                        th:text="${(pageData != null ? pageData.number * pageData.size : 0) + stat.count}">
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-bold text-white uppercase tracking-wider" th:text="${customer.name}"></div>
+                                    <div class="text-sm font-bold text-white uppercase tracking-wider"
+                                        th:text="${customer.name}"></div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-400" th:text="${customer.email}"></div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-400 line-clamp-2" th:text="${customer.fullAddress}"></div>
+                                    <div class="text-sm text-gray-400 line-clamp-2" th:text="${customer.fullAddress}">
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm font-medium">
-                                    <a th:href="@{/ekansh/rentals(customerId=${customer.customerId}, name=${customer.name})}" class="inline-flex items-center px-3 py-1 border border-gray-700 text-gray-300 rounded text-xs font-bold hover:bg-white hover:text-black transition">
+                                    <a th:href="@{/ekansh/rentals(customerId=${customer.customerId}, name=${customer.name})}"
+                                        class="inline-flex items-center px-3 py-1 border border-gray-700 text-gray-300 rounded text-xs font-bold hover:bg-white hover:text-black transition">
                                         Rentals
-                                        <svg class="ml-1 w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        <svg class="ml-1 w-3 h-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5l7 7-7 7"></path>
                                         </svg>
                                     </a>
                                 </td>
@@ -190,7 +258,8 @@
             </div>
         </form>
 
-        <div class="mt-6 flex items-center justify-between text-gray-400 p-2" th:if="${pageData != null and pageData.totalPages > 0}">
+        <div class="mt-6 flex items-center justify-between text-gray-400 p-2"
+            th:if="${pageData != null and pageData.totalPages > 0}">
             <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                     <p class="text-sm">
@@ -221,7 +290,8 @@
                     class="px-3 py-1 border border-gray-700 rounded text-sm font-medium bg-black text-white hover:bg-gray-800 transition">
                     Prev
                 </a>
-                <p class="text-sm text-gray-400">Pg <span class="text-white" th:text="${pageData.number + 1}"></span></p>
+                <p class="text-sm text-gray-400">Pg <span class="text-white" th:text="${pageData.number + 1}"></span>
+                </p>
                 <a th:if="${pageData.number < pageData.totalPages - 1}"
                     th:href="@{/ekansh/customers(page=${pageData.number + 1}, keyword=${currentKeyword})}"
                     class="px-3 py-1 border border-gray-700 rounded text-sm font-medium bg-black text-white hover:bg-gray-800 transition">
@@ -305,4 +375,5 @@
         });
     </script>
 </body>
+
 </html>
