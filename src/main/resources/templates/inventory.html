@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Cine Rentals | Catalog</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* EXACT BACKGROUND FROM STORES.HTML */
+    body {
+        background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop');
+        background-size: cover;
+        background-attachment: fixed;
+    }
+    /* EXACT BLUR LAYER FROM STORES.HTML */
+    .blur-layer {
+        backdrop-filter: blur(8px);
+        background: rgba(15, 23, 42, 0.7);
+        min-height: 100vh;
+    }
+    /* EXACT GLASS CARD FROM STORES.HTML */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(8px);
+    }
+  </style>
+</head>
+<body class="text-slate-900 font-sans antialiased">
+<div class="blur-layer p-6 md:p-12">
+  <div class="max-w-6xl mx-auto">
+
+    <!-- Header (Glass Card Style) -->
+    <div class="glass-card p-8 rounded-[2rem] flex justify-between items-center mb-10 shadow-2xl border border-white/20">
+      <div>
+        <h1 class="text-4xl font-black tracking-tighter text-slate-900 uppercase italic">Catalog <span class="text-rose-600">#<span th:text="${storeId}"></span></span></h1>
+        <p class="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em]">Curated Film Selection • <span th:text="${totalResults}"></span> Titles Available</p>
+      </div>
+      <div class="flex gap-3">
+        <a href="/ameya/stores" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition flex items-center shadow-lg hover:bg-black">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Back to Directory
+        </a>
+      </div>
+    </div>
+
+    <!-- Search Section (Glass Card Style) -->
+    <div class="glass-card p-4 rounded-2xl mb-8 border border-white/20 shadow-xl">
+      <form action="/ameya/inventory" method="GET" class="flex gap-3">
+        <input type="hidden" name="storeId" th:value="${storeId}">
+        <input type="text" name="movieKeyword" th:value="${movieKeyword}"
+               class="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-6 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none transition font-bold"
+               placeholder="Search by film title...">
+        <button type="submit" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-black transition">Search</button>
+      </form>
+    </div>
+
+    <!-- Movie Grid (Cards now use Glass Card style to match Store list) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+      <div th:each="item : ${inventory}" class="group">
+
+        <!-- Poster Glass Card -->
+        <div class="glass-card aspect-[2/3] rounded-[2rem] overflow-hidden shadow-xl border border-white/20 transition-all duration-300 group-hover:scale-105 relative flex flex-col items-center justify-center">
+          <div class="opacity-10 text-slate-900 mb-2">
+            <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v2a2 2 0 100 4v2a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>
+          </div>
+          <div class="absolute bottom-5 right-5 bg-rose-600 px-4 py-1.5 rounded-full text-[10px] font-black text-white shadow-lg">
+            <span th:text="${item.count}"></span> COPIES
+          </div>
+        </div>
+
+        <!-- Info (Text colors adjusted for readability on the dark background) -->
+        <div class="mt-5 px-1 text-center">
+          <h3 class="font-black text-sm text-white uppercase tracking-tight group-hover:text-rose-400 transition truncate" th:text="${item.title}">Title</h3>
+          <p class="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-widest">
+            Duration: <span th:text="${item.length}" class="text-white"></span> mins
+          </p>
+          <button class="mt-4 w-full py-2.5 bg-white border border-white/20 hover:bg-rose-600 hover:text-white hover:border-rose-600 text-slate-400 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-300">
+            Available
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-16 flex justify-center items-center gap-4" th:if="${totalPages > 1}">
+      <a th:href="@{/ameya/inventory(storeId=${storeId}, movieKeyword=${movieKeyword}, page=${currentPage - 1})}"
+         th:if="${currentPage > 0}"
+         class="glass-card px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition hover:bg-rose-600 hover:text-white">Prev</a>
+
+      <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Page <span th:text="${currentPage + 1}" class="text-white"></span> / <span th:text="${totalPages}" class="text-white"></span></span>
+
+      <a th:href="@{/ameya/inventory(storeId=${storeId}, movieKeyword=${movieKeyword}, page=${currentPage + 1})}"
+         th:if="${currentPage < totalPages - 1}"
+         class="glass-card px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition hover:bg-rose-600 hover:text-white">Next</a>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class ExternalApiService {
@@ -77,7 +78,6 @@ public class ExternalApiService {
                 + size;
         return restTemplate.getForObject(url, CustomerPageResponse.class);
     }
-
 
     public List<StoreDTO> getAllStores() {
         // Add the projection parameter to the URL!
@@ -193,14 +193,14 @@ public class ExternalApiService {
     // ✅ GET ALL FILMS
  public FilmResponse getAllFilms(String keyword, int page, int size) {
     String url;
-    
+
     if (keyword != null && !keyword.isEmpty()) {
         // ✅ Hits your specific @RestResource(path = "byTitle")
         // Note: Use 'title' as the parameter name because of your @Param("title")
-        url = baseUrl + "/films/search/byTitle?title=" + keyword 
-            + "&projection=filmProjection"; 
-            
-        // Note: Since your repository method returns List<Film>, 
+        url = baseUrl + "/films/search/byTitle?title=" + keyword
+            + "&projection=filmProjection";
+
+        // Note: Since your repository method returns List<Film>,
         // the backend might ignore page/size during search.
     } else {
         // Normal paginated list
@@ -208,23 +208,23 @@ public class ExternalApiService {
     }
 
     try {
-        // Even if the repository returns a List, Spring Data REST wraps it 
+        // Even if the repository returns a List, Spring Data REST wraps it
         // in an "_embedded" object, so your FilmResponse class will still work.
         return restTemplate.getForObject(url, FilmResponse.class);
     } catch (Exception e) {
         System.err.println("API Search Error: " + e.getMessage());
-        return new FilmResponse(); 
+        return new FilmResponse();
     }
 }
 //     public FilmResponse getAllFilms(String keyword, int page, int size) {
 //     String url;
 //     if (keyword != null && !keyword.isEmpty()) {
-//         url = baseUrl + "/films/search/findByTitleContaining?title=" + keyword 
+//         url = baseUrl + "/films/search/findByTitleContaining?title=" + keyword
 //             + "&projection=filmProjection&page=" + page + "&size=" + size;
 //     } else {
 //         url = baseUrl + "/films?projection=filmProjection&page=" + page + "&size=" + size;
 //     }
-    
+
 //     try {
 //         return restTemplate.getForObject(url, FilmResponse.class);
 //     } catch (Exception e) {
@@ -241,7 +241,7 @@ public class ExternalApiService {
             System.err.println("Error saving film: " + e.getMessage());
         }
     }
-    
+
 
 
     public FilmDTO getFilmById(Long id) {
@@ -260,7 +260,7 @@ public void saveOrUpdateFilm(FilmDTO film, String selectedLanguageId) {
         payload.put("rentalRate", film.getRentalRate());
         payload.put("length", film.getLength());
         payload.put("replacementCost", film.getReplacementCost());
-        
+
         // Fix 1: Ensure Rating matches Enum Constant Name (e.g. PG_13 if applicable, or exactly the string)
         // Usually, Enum converters expect the string value. If "PG-13" is in the UI, check your backend Enum name.
         payload.put("rating", film.getRating());
@@ -304,17 +304,17 @@ public void saveOrUpdateFilm(FilmDTO film, String selectedLanguageId) {
 
    public List<ActorDTO> getActorsByFilm(Long filmId) {
     String url = baseUrl + "/films/" + filmId + "/actors?projection=actorProjection";
-    
+
     // DEBUG: Print this URL and open it in your browser to check the data
     System.out.println("Fetching actors from: " + url);
-    
+
     try {
         // We fetch as String first to see the RAW JSON in the console
         String rawJson = restTemplate.getForObject(url, String.class);
         System.out.println("RAW JSON FROM BACKEND: " + rawJson);
 
         ActorResponse response = restTemplate.getForObject(url, ActorResponse.class);
-        return (response != null && response.getEmbedded() != null) ? 
+        return (response != null && response.getEmbedded() != null) ?
                 response.getEmbedded().getActors() : new java.util.ArrayList<>();
     } catch (Exception e) {
         return new java.util.ArrayList<>();
@@ -322,6 +322,116 @@ public void saveOrUpdateFilm(FilmDTO film, String selectedLanguageId) {
 }
 
 
+    //-------------------------------------------- Store Services ------------------------------------------------------
+
+
+    public List<StoreDTO> searchStores(String keyword, int page, int size) {
+        // 1. Build the URL using fromUriString to avoid compilation errors
+        // 2. We use .encode() to handle spaces in addresses (e.g., "47 MySakila Drive")
+        String url = UriComponentsBuilder.fromUriString(this.baseUrl + "stores/search/findStoresByKeyword")
+                .queryParam("keyword", keyword)
+                .queryParam("page", page)
+                .queryParam("size", size)
+                .encode()
+                .toUriString();
+
+        try {
+            // Log the URL to your IDE console so you can test it in a browser if it fails
+            System.out.println("DEBUG: Searching stores at: " + url);
+
+            // Map the complex JSON structure to our response DTO
+            StoreListResponse response = restTemplate.getForObject(url, StoreListResponse.class);
+
+            // Extract the list from the _embedded wrapper
+            if (response != null && response.getStores() != null) {
+                return response.getStores();
+            }
+
+            return java.util.Collections.emptyList();
+
+        } catch (Exception e) {
+            // Log the specific error (e.g., 404 if the method name is wrong on the backend)
+            System.err.println("API Error during store search: " + e.getMessage());
+            return java.util.Collections.emptyList();
+        }
+    }
+
+
+    public List<java.util.Map<String, Object>> getAllStaff() {
+        String url = this.baseUrl + "staff";
+        try {
+            java.util.Map<String, Object> response = restTemplate.getForObject(url, java.util.Map.class);
+            if (response != null && response.containsKey("_embedded")) {
+                java.util.Map<String, Object> embedded = (java.util.Map<String, Object>) response.get("_embedded");
+                return (List<java.util.Map<String, Object>>) embedded.get("staff");
+            }
+        } catch (Exception e) {
+            System.err.println("Staff fetch failed: " + e.getMessage());
+        }
+        return java.util.Collections.emptyList();
+    }
+
+    public void createStore(StoreFormDTO formDTO) {
+        java.util.Map<String, Object> payload = new java.util.HashMap<>();
+
+        // Spring Data REST requires the full URI for associations
+        payload.put("address", this.baseUrl + "addresses/" + formDTO.getAddressId());
+        payload.put("manager", this.baseUrl + "staff/" + formDTO.getManagerStaffId());
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+
+        org.springframework.http.HttpEntity<java.util.Map<String, Object>> request =
+                new org.springframework.http.HttpEntity<>(payload, headers);
+
+        restTemplate.postForObject(this.baseUrl + "stores", request, String.class);
+    }
+
+    public void updateStoreAddress(Byte storeId, Short addressId) {
+        String addressUri = this.baseUrl + "addresses/" + addressId;
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.valueOf("text/uri-list"));
+        
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(addressUri, headers);
+
+        restTemplate.exchange(this.baseUrl + "stores/" + storeId + "/address", org.springframework.http.HttpMethod.PUT, request, String.class);
+    }
+
+
+    public List<InventoryResponse.InventoryItem> getInventoriesByStore(Byte storeId) {
+        // 1. Clean the base URL to prevent double slashes
+        String cleanBase = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+
+        // 2. Build the store URI (The backend needs this full link as a parameter)
+        String storeUri = cleanBase + "/stores/" + storeId;
+
+        // 3. Build the search URL
+        String searchUrl = UriComponentsBuilder.fromUriString(cleanBase + "/inventories/search/findByStore")
+                .queryParam("store", storeUri)
+                .toUriString();
+
+        try {
+            // CHECK YOUR INTELLIJ CONSOLE FOR THIS PRINT!
+            System.out.println("UI Calling URL: " + searchUrl);
+
+            InventoryResponse response = restTemplate.getForObject(searchUrl, InventoryResponse.class);
+
+            if (response != null && response.getEmbedded() != null) {
+                return response.getEmbedded().getInventories();
+            }
+            return java.util.Collections.emptyList();
+        } catch (Exception e) {
+            // If there's a mapping error with FilmDTO, it will show up here
+            System.err.println("API/Mapping Error: " + e.getMessage());
+            e.printStackTrace();
+            return java.util.Collections.emptyList();
+        }
+    }
+
+
+
+    //------------------------------------------------------------------------------------------------------------------
 
     //Language Backend End points
     public LanguageResponse getAllLanguage(int page, int size){
