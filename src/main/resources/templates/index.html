@@ -1,10 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilmFlix - Rental System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #141414; color: white; display: flex; flex-direction: column; min-height: 100vh;}
+        .bg-netflix { background-color: #E50914; }
+        .hover-bg-netflix:hover { background-color: #f40612; }
+        .text-netflix { color: #E50914; }
+        .hero-bg {
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)), 
+                        url('https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+        }
+        .nav-link { transition: color 0.2s; }
+        .nav-link:hover { color: #b3b3b3; }
+        .card-zoom { transition: transform 0.3s ease; }
+        .card-zoom:hover { transform: scale(1.05); }
+    </style>
 </head>
-<body>
-    This is our static page!!
+<body class="hero-bg">
+    <!-- Navbar -->
+    <nav class="flex justify-between items-center px-4 md:px-12 py-4 bg-gradient-to-b from-black to-transparent w-full z-10 sticky top-0">
+        <div class="flex items-center gap-8">
+            <h1 class="text-3xl md:text-5xl font-bold text-netflix tracking-tighter">FILM<span class="text-white">FLIX</span></h1>
+            <div class="hidden md:flex gap-6 mt-2 text-sm font-semibold">
+                <a href="/" class="text-white nav-link">Home</a>
+                <a href="/films" class="text-gray-300 nav-link">Films</a>
+                <a href="/categories" class="text-gray-300 nav-link">Categories</a>
+                <a href="/customers" class="text-gray-300 nav-link">Customers</a>
+                <a href="/staff" class="text-gray-300 nav-link">Staff</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Content -->
+    <main class="flex-grow flex flex-col justify-center items-center text-center px-4 mt-16 md:mt-0">
+        <h2 class="text-4xl md:text-6xl font-extrabold mb-4 max-w-4xl tracking-tight">Unlimited films, categories, and more.</h2>
+        <p class="text-xl md:text-2xl mb-8 font-medium">Manage your rental business anywhere. Cancel anytime.</p>
+        <p class="text-md md:text-lg mb-6 text-gray-300">Ready to manage? Select a module to get started.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl w-full z-10 px-4">
+            <a href="/films" class="card-zoom bg-gray-900 bg-opacity-80 border border-gray-700 rounded-lg p-6 flex flex-col items-center justify-center text-center group">
+                <div class="p-4 bg-netflix rounded-full mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white group-hover:text-netflix transition-colors">Manage Films</h3>
+                <p class="text-gray-400 mt-2 text-sm">Add, remove, or modify your film inventory</p>
+            </a>
+            
+            <a href="/categories" class="card-zoom bg-gray-900 bg-opacity-80 border border-gray-700 rounded-lg p-6 flex flex-col items-center justify-center text-center group">
+                <div class="p-4 bg-netflix rounded-full mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white group-hover:text-netflix transition-colors">Categories</h3>
+                <p class="text-gray-400 mt-2 text-sm">Organize films by genre</p>
+            </a>
+            
+            <a href="/customers" class="card-zoom bg-gray-900 bg-opacity-80 border border-gray-700 rounded-lg p-6 flex flex-col items-center justify-center text-center group">
+                <div class="p-4 bg-netflix rounded-full mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white group-hover:text-netflix transition-colors">Customers</h3>
+                <p class="text-gray-400 mt-2 text-sm">View user base and rentals</p>
+            </a>
+            
+            <a href="/staff" class="card-zoom bg-gray-900 bg-opacity-80 border border-gray-700 rounded-lg p-6 flex flex-col items-center justify-center text-center group">
+                <div class="p-4 bg-netflix rounded-full mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white group-hover:text-netflix transition-colors">Staff</h3>
+                <p class="text-gray-400 mt-2 text-sm">Manage employees and shifts</p>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 text-center text-gray-500 border-t border-gray-800 mt-12 bg-black bg-opacity-80">
+        <p>&copy; 2026 FilmFlix Management System. Netflix-inspired UI.</p>
+    </footer>
 </body>
 </html>

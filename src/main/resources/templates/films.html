@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Film Inventory</title>
+    <title>Film Inventory - FilmFlix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
@@ -11,17 +11,43 @@
             from { opacity: 0; transform: translateY(5px); } 
             to { opacity: 1; transform: translateY(0); } 
         }
+        body { background-color: #141414; color: white; }
+        .bg-netflix { background-color: #E50914; }
+        .hover-bg-netflix:hover { background-color: #f40612; }
+        .text-netflix { color: #E50914; }
+        .nav-link { transition: color 0.2s; }
+        .nav-link:hover { color: #b3b3b3; }
+        
+        /* Custom scrollbar for dark theme */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen p-4 sm:p-8 fade-in">
+<body class="font-sans antialiased min-h-screen fade-in flex flex-col">
 
-    <div class="max-w-full mx-auto">
+    <!-- Navbar -->
+    <nav class="flex justify-between items-center px-4 md:px-12 py-4 bg-black w-full z-10 sticky top-0 border-b border-gray-800">
+        <div class="flex items-center gap-8">
+            <a href="/" class="text-3xl font-bold text-netflix tracking-tighter">FILM<span class="text-white">FLIX</span></a>
+            <div class="hidden md:flex gap-6 mt-1 text-sm font-semibold">
+                <a href="/" class="text-gray-300 nav-link">Home</a>
+                <a href="/films" class="text-white nav-link">Films</a>
+                <a href="/categories" class="text-gray-300 nav-link">Categories</a>
+                <a href="/customers" class="text-gray-300 nav-link">Customers</a>
+                <a href="/staff" class="text-gray-300 nav-link">Staff</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-full mx-auto p-4 sm:p-8 flex-grow w-full">
 
         <!-- Header -->
         <div class="mb-8">
-            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Film Inventory</h2>
-            <p class="text-gray-500 mt-2 text-sm">Full catalog management including pricing, specs, and cast lists.</p>
+            <h2 class="text-3xl font-extrabold text-white tracking-tight">Film Inventory</h2>
+            <p class="text-gray-400 mt-2 text-sm">Full catalog management including pricing, specs, and cast lists.</p>
         </div>
 
         <!-- Toolbar -->
@@ -34,36 +60,38 @@
                         </svg>
                     </div>
                     <input type="text" name="keyword" th:value="${currentKeyword}"
-                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-[#E50914] focus:border-transparent sm:text-sm"
                         placeholder="Search films...">
                 </div>
 
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Search</button>
+                <button type="submit" class="px-4 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition">Search</button>
+                <a th:if="${currentKeyword != null}" th:href="@{/films}" class="px-4 py-2 border border-gray-700 rounded-lg text-sm bg-gray-800 hover:bg-gray-700 transition">Clear</a>
 
-                <a th:href="@{/films/new}" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700">+ Add Film</a>
+                <a th:href="@{/films/new}" class="px-4 py-2 bg-white text-black bg-opacity-90 rounded-lg text-sm font-bold hover:bg-gray-200 transition flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Add Film
+                </a>
 
-                <button type="button" id="toggleUpdateBtn" class="px-4 py-2 bg-yellow-400 rounded-lg text-sm font-medium hover:bg-yellow-500">Update Mode</button>
-                <button type="submit" id="submitUpdateBtn" form="bulkForm" class="hidden px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700" disabled>Edit Selected</button>
+                <button type="button" id="toggleUpdateBtn" class="px-4 py-2 bg-gray-800 border border-gray-700 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition">Select to Edit</button>
+                <button type="submit" id="submitUpdateBtn" form="bulkForm" class="hidden px-4 py-2 bg-white text-black font-bold rounded-lg text-sm hover:bg-gray-200" disabled>Edit Selected</button>
 
-                <button type="button" id="toggleDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">Delete Mode</button>
+                <button type="button" id="toggleDeleteBtn" class="px-4 py-2 bg-transparent border border-red-600 text-red-500 rounded-lg text-sm font-medium hover:bg-red-600 hover:text-white transition">Select to Delete</button>
                 <button type="submit" id="submitDeleteBtn" form="bulkForm" th:formaction="@{/films/delete}" formmethod="POST"
-                    class="hidden px-4 py-2 bg-red-800 text-white rounded-lg text-sm font-medium hover:bg-red-900"
-                    disabled onclick="return confirm('Delete selected films?');">Delete Selected</button>
-                
-                <a th:if="${currentKeyword != null}" th:href="@{/films}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50">Clear</a>
+                    class="hidden px-4 py-2 bg-netflix text-white rounded-lg text-sm font-medium hover:bg-red-700 transition"
+                    disabled onclick="return confirm('Delete selected films from catalog?');">Delete Selected</button>
             </form>
         </div>
 
         <!-- Main Table Container -->
         <form id="bulkForm" th:action="@{/films/edit}" method="GET">
-            <div class="bg-white shadow-md rounded-xl border border-gray-200 overflow-hidden">
+            <div class="bg-black shadow-lg rounded-xl border border-gray-800 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                    <table class="min-w-full divide-y divide-gray-800">
+                        <thead class="bg-gray-900 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                             <tr>
                                 <th class="radio-col hidden px-2 py-4 text-center w-8">Sel</th>
-                                <th class="checkbox-col hidden px-2 py-4 text-center w-8"><input type="checkbox" id="selectAllCb"></th>
-                                <th class="px-4 py-4 text-left w-12">#</th>
+                                <th class="checkbox-col hidden px-2 py-4 text-center w-8"><input type="checkbox" id="selectAllCb" class="bg-gray-800 border-gray-700 rounded"></th>
+                                <th class="px-4 py-4 text-left w-12 text-gray-500">#</th>
                                 <th class="px-4 py-4 text-left">Title & Language</th>
                                 <th class="px-4 py-4 text-left">Year/Dur/Len</th>
                                 <th class="px-4 py-4 text-left">Rating</th>
@@ -73,55 +101,54 @@
                                 <th class="px-4 py-4 text-left w-24">Action</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-100">
-                            <tr th:each="film, stat : ${films}" class="hover:bg-blue-50 transition group text-sm">
+                        <tbody class="bg-black divide-y divide-gray-800">
+                            <tr th:each="film, stat : ${films}" class="hover:bg-gray-900 transition duration-200 group text-sm">
                                 <td class="radio-col hidden px-2 py-4 text-center">
                                     <input type="radio" name="filmId" th:value="${film.getIdFromLink()}">
                                 </td>
                                 <td class="checkbox-col hidden px-2 py-4 text-center">
-                                    <input type="checkbox" name="filmIds" th:value="${film.getIdFromLink()}">
+                                    <input type="checkbox" name="filmIds" th:value="${film.getIdFromLink()}" class="bg-gray-800 border-gray-700 rounded text-netflix focus:ring-netflix">
                                 </td>
 
                                 <!-- Correct Serial Number Logic -->
-                                <td class="px-4 py-4 font-semibold text-gray-400" 
+                                <td class="px-4 py-4 font-semibold text-gray-600" 
                                     th:text="${(pageData != null ? pageData.number * pageData.size : 0) + stat.count}"></td>
 
                                 <td class="px-4 py-4">
-                                    <div class="font-bold text-gray-900 uppercase leading-none" th:text="${film.title}"></div>
-                                    <div class="text-[11px] text-gray-500 line-clamp-1 my-1" th:text="${film.description}"></div>
-                                    <span class="text-[10px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-600 font-medium" th:text="${film.language}"></span>
+                                    <div class="font-bold text-white uppercase tracking-wider" th:text="${film.title}"></div>
+                                    <div class="text-[11px] text-gray-400 line-clamp-1 my-1" th:text="${film.description}"></div>
+                                    <span class="text-[10px] px-1.5 py-0.5 border border-gray-700 rounded text-gray-300 font-medium" th:text="${film.language}"></span>
                                 </td>
 
-                                <td class="px-4 py-4 whitespace-nowrap text-gray-600">
-                                    <div th:text="${'Year: ' + film.releaseYear}"></div>
-                                    <div class="text-[11px]" th:text="${'Dur: ' + film.rentalDuration + ' days'}"></div>
-                                    <div class="text-[11px]" th:text="${'Len: ' + film.length + ' min'}"></div>
-                                </td>
-
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-bold rounded" th:text="${film.rating}"></span>
+                                <td class="px-4 py-4 whitespace-nowrap text-gray-400">
+                                    <div class="text-white font-medium" th:text="${film.releaseYear}"></div>
+                                    <div class="text-[11px]" th:text="${film.rentalDuration + ' days / ' + film.length + ' min'}"></div>
                                 </td>
 
                                 <td class="px-4 py-4 whitespace-nowrap">
-                                    <div class="text-green-600 font-bold" th:text="${'Rate: $' + film.rentalRate}"></div>
-                                    <div class="text-red-400 text-[10px] font-medium" th:text="${'Replace: $' + film.replacementCost}"></div>
+                                    <span class="px-2 py-1 border border-gray-600 text-gray-300 text-xs font-bold rounded shadow-sm" th:text="${film.rating}"></span>
+                                </td>
+
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="text-white font-bold" th:text="${'$' + film.rentalRate}"></div>
+                                    <div class="text-gray-500 text-[10px] font-medium" th:text="${'Replace: $' + film.replacementCost}"></div>
                                 </td>
 
                                 <td class="px-4 py-4">
                                     <div class="flex flex-wrap gap-1 max-w-[150px]">
                                         <span th:each="feature : ${film.specialFeatures}" 
-                                              class="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                                              class="text-[9px] bg-gray-800 text-gray-300 px-1.5 py-0.5 rounded-sm whitespace-nowrap border border-gray-700"
                                               th:text="${feature}"></span>
-                                        <span th:if="${film.specialFeatures == null or #lists.isEmpty(film.specialFeatures)}" class="text-gray-400 italic text-[10px]">None</span>
+                                        <span th:if="${film.specialFeatures == null or #lists.isEmpty(film.specialFeatures)}" class="text-gray-600 italic text-[10px]">None</span>
                                     </div>
                                 </td>
 
-                                <td class="px-4 py-4 whitespace-nowrap text-[10px] text-gray-400" th:text="${film.lastUpdate}"></td>
+                                <td class="px-4 py-4 whitespace-nowrap text-[10px] text-gray-500" th:text="${film.lastUpdate}"></td>
 
                                 <td class="px-4 py-4 whitespace-nowrap">
                                     <a th:href="@{/films/actors(filmId=${film.getIdFromLink()}, title=${film.title})}" 
-                                       class="inline-flex items-center text-blue-600 font-bold hover:text-blue-900 group">
-                                        Actors 
+                                       class="inline-flex items-center text-gray-300 border border-gray-600 px-2 py-1 rounded text-xs font-bold hover:bg-white hover:text-black transition group">
+                                        Cast 
                                         <span class="ml-1 transition-transform group-hover:translate-x-1">&rarr;</span>
                                     </a>
                                 </td>
@@ -133,14 +160,14 @@
         </form>
 
         <!-- Dynamic Pagination System -->
-        <div class="mt-6 flex items-center justify-between bg-white p-4 rounded-xl border border-gray-200 shadow-sm" th:if="${pageData != null and pageData.totalPages > 0}">
+        <div class="mt-6 flex items-center justify-between text-gray-400 p-2" th:if="${pageData != null and pageData.totalPages > 0}">
             
             <div>
-                <p class="text-sm text-gray-700">
-                    Showing Page <span class="font-bold text-gray-900" th:text="${pageData.number + 1}"></span> 
-                    of <span class="font-bold text-gray-900" th:text="${pageData.totalPages}"></span>
-                    <span class="text-gray-400 mx-2">|</span>
-                    Total Items: <span class="font-semibold text-gray-900" th:text="${pageData.totalElements}"></span>
+                <p class="text-sm">
+                    Page <span class="font-bold text-white" th:text="${pageData.number + 1}"></span> 
+                    of <span class="font-bold text-white" th:text="${pageData.totalPages}"></span>
+                    <span class="mx-2">|</span>
+                    Total: <span class="font-semibold text-white" th:text="${pageData.totalElements}"></span>
                 </p>
             </div>
 
@@ -148,19 +175,24 @@
                 <!-- Previous Button -->
                 <a th:if="${pageData.number > 0}"
                    th:href="@{/films(page=${pageData.number - 1}, keyword=${currentKeyword})}"
-                   class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 transition shadow-sm">
-                    &larr; Previous
+                   class="px-3 py-1 border border-gray-700 rounded text-sm font-medium bg-black text-white hover:bg-gray-800 transition">
+                    &larr; Prev
                 </a>
 
                 <!-- Next Button -->
                 <a th:if="${pageData.number < pageData.totalPages - 1}"
                    th:href="@{/films(page=${pageData.number + 1}, keyword=${currentKeyword})}"
-                   class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white text-gray-700 hover:bg-gray-50 transition shadow-sm">
+                   class="px-3 py-1 border border-gray-700 rounded text-sm font-medium bg-black text-white hover:bg-gray-800 transition">
                     Next &rarr;
                 </a>
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-gray-600 border-t border-gray-900 mt-auto bg-black">
+        <p class="text-xs">&copy; 2026 FilmFlix Management System.</p>
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {

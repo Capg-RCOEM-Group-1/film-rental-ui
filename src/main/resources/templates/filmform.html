@@ -1,153 +1,200 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
-    <title th:text="${film.filmId != null ? 'Edit Film' : 'Add New Film'}"></title>
+    <title th:text="${film.filmId != null ? 'Edit Film - FilmFlix' : 'Add New Film - FilmFlix'}">Film Form</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #141414; color: white; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(5px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .bg-netflix { background-color: #E50914; }
+        .text-netflix { color: #E50914; }
+        .nav-link { transition: color 0.2s; }
+        .nav-link:hover { color: #b3b3b3; }
+        
+        /* Custom scrollbar for dark theme */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #141414; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
 </head>
 
-<body class="bg-gray-50 p-6 sm:p-12 font-sans antialiased min-h-screen">
+<body class="font-sans antialiased min-h-screen fade-in flex flex-col">
 
-    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
-        
-        <!-- Header -->
-        <div class="bg-gray-900 p-8">
-            <h2 class="text-2xl font-bold text-white" th:text="${film.filmId != null ? 'Update Film Record' : 'Create New Film Record'}"></h2>
-            <p class="text-gray-400 text-sm mt-1 italic">Please ensure all required movie information is provided.</p>
-        </div>
-
-        <!-- Form: Note the th:action use for path independence -->
-        <form th:action="@{/films/save}" th:object="${film}" method="POST" class="p-8 space-y-6">
-            
-            <!-- Hidden ID Field (Only used during Edit) -->
-            <input type="hidden" th:field="*{filmId}" />
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
-                <!-- 1. Title -->
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Movie Title</label>
-                    <input type="text" th:field="*{title}" placeholder="ENTER MOVIE TITLE" required
-                        class="w-full border border-gray-200 rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:bg-white uppercase outline-none transition" />
-                </div>
-
-                <!-- 2. Description -->
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Synopsis (Description)</label>
-                    <textarea th:field="*{description}" rows="3" placeholder="Enter movie description..."
-                        class="w-full border border-gray-200 rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition"></textarea>
-                </div>
-
-                <!-- 3. Language (Using your Service results) -->
-                <!-- Inside filmform.html, locate the Language Select section -->
-<div>
-    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Primary Language</label>
-    <select name="languageId" required
-        class="w-full border border-gray-200 rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none transition">
-        
-        <option value="" disabled th:selected="${film.filmId == null}">-- Select Language --</option>
-        
-        <!-- Use lang.id (String) for the value and lang.name for display -->
-        <option th:each="lang : ${languages}" 
-                th:value="${lang.id}" 
-                th:text="${lang.name}"
-                th:selected="${lang.name == film.language}">
-        </option>
-        
-    </select>
-</div>
-
-                <!-- 4. Rating -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">MPAA Rating</label>
-                    <select th:field="*{rating}" required
-                        class="w-full border border-gray-200 rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none">
-                        <option value="G">General Audiences (G)</option>
-                        <option value="PG">Parental Guidance Suggested (PG)</option>
-                        <option value="PG-13">Parents Strongly Cautioned (PG-13)</option>
-                        <option value="R">Restricted (R)</option>
-                        <option value="NC-17">Adults Only (NC-17)</option>
-                    </select>
-                </div>
-
-                <!-- 5. Numeric Fields: Year & Duration -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Release Year</label>
-                        <input type="number" th:field="*{releaseYear}" min="1900" max="2100"
-                            class="w-full border border-gray-200 rounded-lg p-3 bg-gray-50 outline-none" />
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Length (Mins)</label>
-                        <input type="number" th:field="*{length}"
-                            class="w-full border border-gray-200 rounded-lg p-3 bg-gray-50 outline-none" />
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Rental Period</label>
-                        <input type="number" th:field="*{rentalDuration}" placeholder="Days"
-                            class="w-full border border-gray-200 rounded-lg p-3 bg-gray-50 outline-none" />
-                    </div>
-                    <div class="invisible">Spacer</div>
-                </div>
-
-                <!-- 6. Pricing Fields -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-green-600">Rental Rate ($)</label>
-                    <input type="number" step="0.01" th:field="*{rentalRate}" required
-                        class="w-full border border-green-200 rounded-lg p-3 bg-green-50 focus:bg-white outline-none text-green-700 font-bold" />
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 text-red-500">Replacement Cost ($)</label>
-                    <input type="number" step="0.01" th:field="*{replacementCost}" required
-                        class="w-full border border-red-100 rounded-lg p-3 bg-red-50 focus:bg-white outline-none text-red-600 font-bold" />
-                </div>
-
-                <!-- 7. Special Features (Checkboxes) -->
-                <!-- Locate the Special Features section in filmform.html -->
-<div class="flex flex-wrap gap-4 p-4 border border-dashed border-gray-300 rounded-xl">
-    <!-- Value should ideally match backend Set enum name: BEHIND_THE_SCENES, DELETED_SCENES, etc. -->
-    <label class="flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded-full cursor-pointer hover:bg-blue-50 transition">
-        <input type="checkbox" name="specialFeatures" value="TRAILERS" 
-               th:checked="${film.specialFeatures != null and film.specialFeatures.contains('TRAILERS')}" />
-        <span class="text-xs font-semibold text-gray-700">Trailers</span>
-    </label>
-    
-    <label class="flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded-full cursor-pointer hover:bg-blue-50 transition">
-        <input type="checkbox" name="specialFeatures" value="COMMENTARIES" 
-               th:checked="${film.specialFeatures != null and film.specialFeatures.contains('COMMENTARIES')}" />
-        <span class="text-xs font-semibold text-gray-700">Commentaries</span>
-    </label>
-    
-    <label class="flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded-full cursor-pointer hover:bg-blue-50 transition">
-        <input type="checkbox" name="specialFeatures" value="DELETED_SCENES" 
-               th:checked="${film.specialFeatures != null and film.specialFeatures.contains('DELETED_SCENES')}" />
-        <span class="text-xs font-semibold text-gray-700">Deleted Scenes</span>
-    </label>
-    
-    <label class="flex items-center gap-2 px-3 py-1 bg-white border border-gray-200 rounded-full cursor-pointer hover:bg-blue-50 transition">
-        <input type="checkbox" name="specialFeatures" value="BEHIND_THE_SCENES" 
-               th:checked="${film.specialFeatures != null and film.specialFeatures.contains('BEHIND_THE_SCENES')}" />
-        <span class="text-xs font-semibold text-gray-700">Behind the Scenes</span>
-    </label>
-</div>
-
-            <!-- Footer Buttons -->
-            <div class="flex items-center justify-between mt-10 pt-6 border-t border-gray-100">
-                <a th:href="@{/films}" class="text-sm font-medium text-gray-400 hover:text-red-500 transition underline underline-offset-4">
-                    &larr; Cancel and go back
-                </a>
-                <button type="submit"
-                    class="px-10 py-3 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-none transition transform hover:-translate-y-0.5 active:translate-y-0">
-                    <span th:text="${film.filmId != null ? 'SAVE CHANGES' : 'CREATE FILM'}"></span>
-                </button>
+    <!-- Navbar -->
+    <nav class="flex justify-between items-center px-4 md:px-12 py-4 bg-black w-full z-10 sticky top-0 border-b border-gray-800">
+        <div class="flex items-center gap-8">
+            <a href="/" class="text-3xl font-bold text-netflix tracking-tighter">FILM<span class="text-white">FLIX</span></a>
+            <div class="hidden md:flex gap-6 mt-1 text-sm font-semibold">
+                <a href="/" class="text-gray-300 nav-link">Home</a>
+                <a href="/films" class="text-white nav-link">Films</a>
+                <a href="/categories" class="text-gray-300 nav-link">Categories</a>
+                <a href="/customers" class="text-gray-300 nav-link">Customers</a>
+                <a href="/staff" class="text-gray-300 nav-link">Staff</a>
             </div>
-        </form>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto p-4 sm:p-8 flex-grow w-full">
+
+        <div class="bg-black shadow-2xl rounded-xl border border-gray-800 overflow-hidden">
+            
+            <!-- Header -->
+            <div class="bg-gray-900 border-b border-gray-800 p-6 sm:p-8 flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-white tracking-wide" th:text="${film.filmId != null ? 'Update Film Record' : 'Create New Film Record'}"></h2>
+                    <p class="text-gray-400 text-sm mt-1">Please ensure all required movie information is provided.</p>
+                </div>
+                <a href="/films" class="text-gray-400 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </a>
+            </div>
+
+            <!-- Form -->
+            <form th:action="@{/films/save}" th:object="${film}" method="POST" class="p-6 sm:p-8 space-y-8">
+                
+                <input type="hidden" th:field="*{filmId}" />
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    <!-- 1. Title -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Movie Title <span class="text-netflix">*</span></label>
+                        <input type="text" th:field="*{title}" placeholder="ENTER MOVIE TITLE" required
+                            class="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:ring-2 focus:ring-[#E50914] focus:outline-none uppercase font-bold tracking-wider transition" />
+                    </div>
+
+                    <!-- 2. Description -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Synopsis (Description)</label>
+                        <textarea th:field="*{description}" rows="3" placeholder="Enter movie description..."
+                            class="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-800 text-gray-300 placeholder-gray-500 focus:ring-2 focus:ring-[#E50914] focus:outline-none transition"></textarea>
+                    </div>
+
+                    <!-- 3. Language -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Primary Language <span class="text-netflix">*</span></label>
+                        <select name="languageId" required
+                            class="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#E50914] focus:outline-none transition">
+                            <option value="" disabled th:selected="${film.filmId == null}">-- Select Language --</option>
+                            <option th:each="lang : ${languages}" 
+                                    th:value="${lang.id}" 
+                                    th:text="${lang.name}"
+                                    th:selected="${lang.name == film.language}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- 4. Rating -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">MPAA Rating <span class="text-netflix">*</span></label>
+                        <select th:field="*{rating}" required
+                            class="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#E50914] focus:outline-none transition">
+                            <option value="G">General Audiences (G)</option>
+                            <option value="PG">Parental Guidance Suggested (PG)</option>
+                            <option value="PG-13">Parents Strongly Cautioned (PG-13)</option>
+                            <option value="R">Restricted (R)</option>
+                            <option value="NC-17">Adults Only (NC-17)</option>
+                        </select>
+                    </div>
+
+                    <!-- 5. Numeric Fields -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Release Year</label>
+                            <input type="number" th:field="*{releaseYear}" min="1900" max="2100"
+                                class="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#E50914] focus:outline-none transition" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Length (Mins)</label>
+                            <input type="number" th:field="*{length}"
+                                class="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#E50914] focus:outline-none transition" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2 sm:col-span-1">
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Rental Period</label>
+                            <div class="relative">
+                                <input type="number" th:field="*{rentalDuration}" placeholder="e.g. 3"
+                                    class="w-full px-4 py-3 pr-12 border border-gray-700 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-[#E50914] focus:outline-none transition" />
+                                <span class="absolute right-4 top-3.5 text-gray-500 font-bold text-sm pointer-events-none">Days</span>
+                            </div>
+                        </div>
+                        <div class="hidden sm:block invisible">Spacer</div>
+                    </div>
+
+                    <!-- 6. Pricing Fields -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 text-green-500">Rental Rate ($) <span class="text-netflix">*</span></label>
+                        <input type="number" step="0.01" th:field="*{rentalRate}" required
+                            class="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-green-400 font-bold focus:ring-2 focus:ring-green-500 focus:outline-none transition" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 text-yellow-500">Replacement Cost ($) <span class="text-netflix">*</span></label>
+                        <input type="number" step="0.01" th:field="*{replacementCost}" required
+                            class="w-full px-4 py-3 border border-gray-700 rounded-lg bg-gray-900 text-yellow-500 font-bold focus:ring-2 focus:ring-yellow-500 focus:outline-none transition" />
+                    </div>
+
+                    <!-- 7. Special Features -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Special Features</label>
+                        <div class="flex flex-wrap gap-3">
+                            <label class="flex items-center gap-2 px-4 py-2 bg-gray-900 border border-gray-700 rounded-full cursor-pointer hover:bg-gray-800 transition group">
+                                <input type="checkbox" name="specialFeatures" value="TRAILERS" 
+                                       th:checked="${film.specialFeatures != null and film.specialFeatures.contains('TRAILERS')}"
+                                       class="accent-[#E50914] w-4 h-4" />
+                                <span class="text-sm font-semibold text-gray-300 group-hover:text-white">Trailers</span>
+                            </label>
+                            
+                            <label class="flex items-center gap-2 px-4 py-2 bg-gray-900 border border-gray-700 rounded-full cursor-pointer hover:bg-gray-800 transition group">
+                                <input type="checkbox" name="specialFeatures" value="COMMENTARIES" 
+                                       th:checked="${film.specialFeatures != null and film.specialFeatures.contains('COMMENTARIES')}" 
+                                       class="accent-[#E50914] w-4 h-4" />
+                                <span class="text-sm font-semibold text-gray-300 group-hover:text-white">Commentaries</span>
+                            </label>
+                            
+                            <label class="flex items-center gap-2 px-4 py-2 bg-gray-900 border border-gray-700 rounded-full cursor-pointer hover:bg-gray-800 transition group">
+                                <input type="checkbox" name="specialFeatures" value="DELETED_SCENES" 
+                                       th:checked="${film.specialFeatures != null and film.specialFeatures.contains('DELETED_SCENES')}" 
+                                       class="accent-[#E50914] w-4 h-4" />
+                                <span class="text-sm font-semibold text-gray-300 group-hover:text-white">Deleted Scenes</span>
+                            </label>
+                            
+                            <label class="flex items-center gap-2 px-4 py-2 bg-gray-900 border border-gray-700 rounded-full cursor-pointer hover:bg-gray-800 transition group">
+                                <input type="checkbox" name="specialFeatures" value="BEHIND_THE_SCENES" 
+                                       th:checked="${film.specialFeatures != null and film.specialFeatures.contains('BEHIND_THE_SCENES')}" 
+                                       class="accent-[#E50914] w-4 h-4" />
+                                <span class="text-sm font-semibold text-gray-300 group-hover:text-white">Behind the Scenes</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="flex flex-col-reverse sm:flex-row items-center justify-between mt-10 pt-8 border-t border-gray-800 gap-4">
+                    <a th:href="@{/films}" class="px-6 py-3 border border-gray-700 text-gray-300 rounded-lg text-sm font-bold hover:bg-gray-800 w-full sm:w-auto text-center transition">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                        class="px-10 py-3 bg-netflix text-white rounded-lg text-sm font-bold shadow-lg shadow-black hover:bg-red-700 w-full sm:w-auto transition">
+                        <span th:text="${film.filmId != null ? 'Save Changes' : 'Create Film'}"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <!-- App Footer -->
+    <footer class="py-6 text-center text-gray-600 border-t border-gray-900 mt-auto bg-black">
+        <p class="text-xs">&copy; 2026 FilmFlix Management System.</p>
+    </footer>
 
 </body>
 </html>
