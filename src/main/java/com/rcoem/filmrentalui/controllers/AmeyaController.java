@@ -48,6 +48,9 @@ public class AmeyaController {
                 model.addAttribute("stores", new ArrayList<StoreDTO>());
             }
 
+            // Provide addresses list for the inline dropdown update
+            model.addAttribute("addresses", externalApiService.getAllAddresses());
+
             // Pass the keyword back to the model so the search input stays populated
             model.addAttribute("currentKeyword", keyword);
 
@@ -92,6 +95,20 @@ public class AmeyaController {
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(AmeyaController.class).error("Store creation failed", e);
             ra.addFlashAttribute("error", "Failed to create store. Ensure address is not already in use.");
+        }
+        return "redirect:/ameya/stores";
+    }
+
+    @PostMapping("/stores/editAddress")
+    public String editStoreAddress(@RequestParam("storeId") Byte storeId,
+                                   @RequestParam("addressId") Short addressId,
+                                   org.springframework.web.servlet.mvc.support.RedirectAttributes ra) {
+        try {
+            externalApiService.updateStoreAddress(storeId, addressId);
+            ra.addFlashAttribute("successMessage", "Store address updated successfully!");
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(AmeyaController.class).error("Store address update failed", e);
+            ra.addFlashAttribute("error", "Failed to update store address.");
         }
         return "redirect:/ameya/stores";
     }

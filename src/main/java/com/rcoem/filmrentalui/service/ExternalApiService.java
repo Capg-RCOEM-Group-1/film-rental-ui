@@ -387,6 +387,17 @@ public void saveOrUpdateFilm(FilmDTO film, String selectedLanguageId) {
         restTemplate.postForObject(this.baseUrl + "stores", request, String.class);
     }
 
+    public void updateStoreAddress(Byte storeId, Short addressId) {
+        String addressUri = this.baseUrl + "addresses/" + addressId;
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.setContentType(org.springframework.http.MediaType.valueOf("text/uri-list"));
+        
+        org.springframework.http.HttpEntity<String> request = new org.springframework.http.HttpEntity<>(addressUri, headers);
+
+        restTemplate.exchange(this.baseUrl + "stores/" + storeId + "/address", org.springframework.http.HttpMethod.PUT, request, String.class);
+    }
+
 
     public List<InventoryResponse.InventoryItem> getInventoriesByStore(Byte storeId) {
         // 1. Clean the base URL to prevent double slashes
