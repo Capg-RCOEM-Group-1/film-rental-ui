@@ -12,11 +12,7 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoreDTO {
     private Short storeId;
-
-    @JsonProperty("addressName")
     private String address;
-
-    @JsonProperty("cityName")
     private String city;
 
     @JsonProperty("_links")
@@ -33,11 +29,8 @@ public class StoreDTO {
             // Fallback: If parsing fails, storeId remains null
         }
     }
-
     public String getFullDisplay() {
         if (address == null) return "";
         return (city != null) ? address + ", " + city : address;
     }
-
-
 }

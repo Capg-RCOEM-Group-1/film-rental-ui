@@ -81,7 +81,7 @@ public class ExternalApiService {
 
     public List<StoreDTO> getAllStores() {
         // Add the projection parameter to the URL!
-        String url = this.baseUrl + "stores?projection=storeInfo";
+        String url = this.baseUrl + "stores";
 
         try {
             StoreListResponse response = restTemplate.getForObject(url, StoreListResponse.class);

@@ -109,7 +109,7 @@
                             <option value="">-- Select a Store --</option>
                             <option th:each="s : ${stores}"
                                     th:value="${s.storeId}"
-                                    th:text="${'Store #' + s.storeId + ' - ' + s.city}"></option>
+                                    th:text="${'Store #' + s.storeId + ' - ' + s.getFullDisplay()}"></option>
                         </select>
                     </div>
 

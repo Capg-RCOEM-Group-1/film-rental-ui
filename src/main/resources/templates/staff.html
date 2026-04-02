@@ -95,7 +95,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 flex flex-wrap gap-2">
-                                <a th:href="@{/aditya/staff/payments(username=${staff.username})}" class="px-3 py-1 bg-gray-800 text-blue-400 border border-gray-700 rounded text-xs hover:bg-gray-700 transition">Payments</a>
+                                <a th:href="@{/aditya/staff/payments(username=${staff.username},staffName=${staff.firstName + ' ' + staff.lastName})}" class="px-3 py-1 bg-gray-800 text-blue-400 border border-gray-700 rounded text-xs hover:bg-gray-700 transition">Payments</a>
                                 <a th:href="@{/aditya/staff/edit/{id}(id=${staff.staffId})}" class="px-3 py-1 bg-gray-800 text-yellow-500 border border-gray-700 rounded text-xs hover:bg-gray-700 transition">Edit</a>
                                 <a th:href="@{/aditya/staff/delete/{id}(id=${staff.staffId})}" class="px-3 py-1 bg-netflix text-white rounded text-xs hover:bg-red-700 transition" onclick="return confirm('Are you sure?')">Deactive</a>
                             </td>
