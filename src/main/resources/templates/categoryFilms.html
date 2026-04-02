@@ -2,76 +2,314 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Films in Category</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --accent-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gold-gradient: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+            --glass-bg: rgba(255, 255, 255, 0.97);
+            --shadow-soft: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.25);
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .page-header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            color: white;
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--accent-gradient);
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3);
+            margin-top: 15px;
+        }
+
+        .page-header h2 {
+            font-size: 1.2rem;
+            font-weight: 300;
+            opacity: 0.8;
+            margin-bottom: 0;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+        }
+
+        .film-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .film-table thead {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .film-table th {
+            padding: 25px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .film-table th i {
+            margin-right: 8px;
+            opacity: 0.8;
+        }
+
+        .film-table td {
+            padding: 25px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .film-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .film-table tbody tr:hover {
+            background: linear-gradient(90deg, #f8f9ff 0%, #fff 100%);
+            transform: scale(1.01);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .film-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .film-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-gradient);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+        }
+
+        .film-title-text {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.1rem;
+        }
+
+        .year-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--gold-gradient);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .rental-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #11998e;
+        }
+
+        .rental-price span {
+            font-size: 0.85rem;
+            color: #999;
+            font-weight: 400;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 25px;
+        }
+
+        .empty-state p {
+            color: #888;
+            font-size: 1.2rem;
+        }
+
+        .pagination-container {
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .pagination {
+            gap: 10px;
+        }
+
+        .page-link {
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            color: #2a5298;
+            background: #f0f4f8;
+            transition: all 0.3s ease;
+        }
+
+        .page-link:hover {
+            background: var(--primary-gradient);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(42, 82, 152, 0.3);
+        }
+
+        .page-item.active .page-link {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .page-item.disabled .page-link {
+            opacity: 0.5;
+        }
+    </style>
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container mt-5">
+<div class="container position-relative">
 
-    <a th:href="@{/categories}" class="btn btn-secondary mb-3">← Back</a>
+    <a th:href="@{/categories}" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
 
-    <h2 class="mb-4 text-center" th:text="'🎥 Films in ' + ${categoryName}"></h2>
-
-    <div class="card shadow">
-        <div class="card-body">
-
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-primary">
-                <tr>
-                    <th>Title</th>
-                    <th>Release Year</th>
-                    <th>Rating</th>
-                    <th>Rental Rate</th>
-                </tr>
-                </thead>
-
-                <tbody>
-                <tr th:each="film : ${films}">
-                    <td th:text="${film.title}"></td>
-                    <td th:text="${film.releaseYear}"></td>
-                    <td th:text="${film.rating}"></td>
-                    <td th:text="${film.rentalRate}"></td>
-                </tr>
-
-                <tr th:if="${#lists.isEmpty(films)}">
-                    <td colspan="4" class="text-center text-danger">
-                        No films found in this category
-                    </td>
-                </tr>
-                </tbody>
-
-            </table>
-
+    <div class="page-header">
+        <h2>FILMS IN CATEGORY</h2>
+        <div class="category-badge">
+            <i class="fas fa-film"></i>
+            <span th:text="${categoryName}"></span>
         </div>
     </div>
 
-    <!-- Pagination -->
-    <div class="d-flex justify-content-center mt-4" th:if="${page != null && page.totalPages > 1}">
+    <div class="glass-card">
 
-        <nav>
-            <ul class="pagination">
+        <table class="film-table">
+            <thead>
+            <tr>
+                <th><i class="fas fa-video"></i> Title</th>
+                <th><i class="fas fa-calendar"></i> Release Year</th>
+                <th><i class="fas fa-star"></i> Rating</th>
+                <th><i class="fas fa-tag"></i> Rental Rate</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="film : ${films}">
+                <td>
+                    <div class="film-title">
+                        <div class="film-icon"><i class="fas fa-film"></i></div>
+                        <span class="film-title-text" th:text="${film.title}"></span>
+                    </div>
+                </td>
+                <td><span class="year-badge" th:text="${film.releaseYear}"></span></td>
+                <td>
+                        <span class="rating-badge">
+                            <i class="fas fa-star"></i>
+                            <span th:text="${film.rating}"></span>
+                        </span>
+                </td>
+                <td>
+                    <div class="rental-price">
+                        $<span th:text="${film.rentalRate}"></span>
+                        <span>/day</span>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(films)}">
+                <td colspan="4">
+                    <div class="empty-state">
+                        <i class="fas fa-film-slash"></i>
+                        <p>No films found in this category</p>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
-                <li class="page-item" th:classappend="${page.number == 0} ? 'disabled' : ''">
-                    <a class="page-link"
-                       th:href="@{/categories/films(categoryId=${categoryId}, name=${categoryName}, page=${page.number - 1})}">
-                        Previous
-                    </a>
-                </li>
-
-                <li class="page-item active">
-                <span class="page-link"
-                      th:text="${page.number + 1} + ' / ' + ${page.totalPages}"></span>
-                </li>
-
-                <li class="page-item" th:classappend="${page.number + 1 >= page.totalPages} ? 'disabled' : ''">
-                    <a class="page-link"
-                       th:href="@{/categories/films(categoryId=${categoryId}, name=${categoryName}, page=${page.number + 1})}">
-                        Next
-                    </a>
-                </li>
-
-            </ul>
-        </nav>
+        <!-- Pagination -->
+        <div class="pagination-container" th:if="${page != null && page.totalPages > 1}">
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${page.number == 0} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/categories/films(categoryId=${categoryId}, name=${categoryName}, page=${page.number - 1})}">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                    <li class="page-item active">
+                        <span class="page-link" th:text="${page.number + 1} + ' / ' + ${page.totalPages}"></span>
+                    </li>
+                    <li class="page-item" th:classappend="${page.number + 1 >= page.totalPages} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/categories/films(categoryId=${categoryId}, name=${categoryName}, page=${page.number + 1})}">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
 
     </div>
 
