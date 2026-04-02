@@ -3,135 +3,181 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Cine Rentals | Directory</title>
+  <title>FilmFlix - Store Directory</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070&auto=format&fit=crop');
-      background-size: cover;
-      background-attachment: fixed;
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
     }
 
-    .blur-layer {
-      backdrop-filter: blur(8px);
-      background: rgba(15, 23, 42, 0.7);
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    body {
+      background-color: #141414;
+      color: white;
+      display: flex;
+      flex-direction: column;
       min-height: 100vh;
     }
 
-    .glass-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
+    .bg-netflix {
+      background-color: #E50914;
+    }
+
+    .hover-bg-netflix:hover {
+      background-color: #f40612;
+    }
+
+    .text-netflix {
+      color: #E50914;
+    }
+
+    .nav-link {
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover {
+      color: #b3b3b3;
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #141414;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
     }
   </style>
 </head>
 
-<body class="text-slate-900 font-sans antialiased">
-  <div class="blur-layer p-6 md:p-12">
-    <div class="max-w-6xl mx-auto">
+<body class="font-sans antialiased min-h-screen fade-in flex flex-col bg-[#141414] text-white">
 
-      <!-- Header -->
-      <div
-        class="glass-card p-8 rounded-[2rem] flex justify-between items-center mb-10 shadow-2xl border border-white/20">
-        <div>
-          <h1 class="text-5xl font-black tracking-tighter text-slate-900 uppercase italic">Cine <span
-              class="text-rose-600">Rentals</span></h1>
-          <p class="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em]">Experience Cinema Like Never Before
-          </p>
-        </div>
-        <div class="flex gap-3">
-          <a href="/ameya/stores/add"
-            class="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition">+
-            Register</a>
-          <button id="toggleUpdateBtn"
-            class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition">Update
-            Mode</button>
-        </div>
+  <!-- Navbar -->
+  <nav
+    class="flex justify-between items-center px-4 md:px-12 py-4 bg-black w-full z-10 sticky top-0 border-b border-gray-800">
+    <div class="flex items-center gap-8">
+      <a href="/" class="text-3xl font-bold text-netflix tracking-tighter">FILM<span class="text-white">FLIX</span></a>
+      <div class="hidden md:flex gap-6 mt-1 text-sm font-semibold">
+        <a href="/" class="text-gray-300 nav-link">Home</a>
+        <a href="/films" class="text-gray-300 nav-link">Films</a>
+        <a href="/categories" class="text-gray-300 nav-link">Categories</a>
+        <a href="/ekansh/customers" class="text-gray-300 nav-link">Customers</a>
+        <a href="/aditya/staff" class="text-gray-300 nav-link">Staff</a>
+        <a href="/mandar/languages" class="text-gray-300 nav-link">Languages</a>
+        <a href="/ameya/stores" class="text-white nav-link">Stores</a>
       </div>
+    </div>
+  </nav>
 
-      <!-- Alert Messages -->
-      <div th:if="${successMessage}" class="bg-green-50 text-green-700 p-4 rounded-xl mb-6 font-bold text-sm"
-        th:text="${successMessage}"></div>
-      <div th:if="${error}" class="bg-red-50 text-red-700 p-4 rounded-xl mb-6 font-bold text-sm" th:text="${error}">
+  <div class="max-w-7xl mx-auto p-4 sm:p-8 flex-grow w-full">
+    <div class="mb-8">
+      <h2 class="text-3xl font-extrabold text-white tracking-tight text-netflix">Store Directory</h2>
+      <p class="text-gray-400 mt-2 text-sm">Manage store locations and view their inventory catalogs.</p>
+    </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}"
+      class="bg-green-900 border-l-4 border-green-500 p-4 mb-6 rounded-r-lg text-green-200 fade-in">
+      <p class="text-sm font-medium" th:text="${successMessage}"></p>
+    </div>
+    <div th:if="${error}" class="bg-red-900 border-l-4 border-netflix p-4 mb-6 rounded-r-lg text-red-200 fade-in">
+      <p class="text-sm font-medium" th:text="${error}"></p>
+    </div>
+
+    <!-- Toolbar: Search + Buttons -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <form action="/ameya/stores" method="GET" class="flex flex-wrap w-full sm:w-auto gap-3">
+        <input type="text" name="keyword" th:value="${currentKeyword}"
+          class="block w-full sm:w-80 px-4 py-2 border border-gray-700 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:ring-2 focus:ring-[#E50914] focus:border-transparent sm:text-sm"
+          placeholder="Search Metropolis or Address...">
+        <button type="submit"
+          class="px-4 py-2 border border-gray-700 text-white rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 transition">Search</button>
+        <a th:if="${currentKeyword != null and !currentKeyword.isEmpty()}" href="/ameya/stores"
+          class="px-4 py-2 border border-gray-700 text-white rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 transition">Clear</a>
+      </form>
+
+      <div class="flex gap-3">
+        <a href="/ameya/stores/add"
+          class="px-4 py-2 bg-white text-black bg-opacity-90 rounded-lg text-sm font-bold hover:bg-gray-200 transition flex items-center gap-1">+
+          Register Store</a>
+        <button type="button" id="toggleUpdateBtn"
+          class="px-4 py-2 border border-gray-700 text-white rounded-lg text-sm font-medium bg-gray-800 hover:bg-gray-700 transition flex items-center">Update
+          Mode</button>
       </div>
+    </div>
 
-      <!-- Search -->
-      <div class="glass-card p-4 rounded-2xl mb-8 border border-white/20">
-        <form action="/ameya/stores" method="GET" class="flex gap-3">
-          <input type="text" name="keyword" th:value="${currentKeyword}"
-            class="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-6 py-3 text-sm focus:ring-2 focus:ring-rose-500 outline-none font-bold"
-            placeholder="Search Metropolis or Address...">
-          <button type="submit"
-            class="bg-slate-900 text-white px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest">Search</button>
-        </form>
-      </div>
-
-      <!-- Table -->
-      <div>
-        <div class="glass-card rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/20">
-          <table class="w-full text-left text-sm">
-            <thead
-              class="bg-slate-50/50 text-slate-400 text-[10px] uppercase tracking-widest font-black border-b border-slate-100">
-              <tr>
-                <th class="radio-col hidden px-8 py-5 text-center">Select</th>
-                <th class="px-8 py-5">Sr.No</th>
-                <th class="px-8 py-5">Store Location</th>
-                <th class="px-8 py-5">Metropolis</th>
-                <th class="px-8 py-5 text-right">Inventory</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr th:each="store : ${stores}" class="hover:bg-rose-50/30 transition group">
-                <td class="radio-col hidden px-8 py-6 text-center">
-                  <input type="radio" name="storeId" th:value="${store.storeId}"
-                    class="store-radio w-4 h-4 text-rose-600">
-                </td>
-                <td class="px-8 py-6 text-rose-600 font-mono font-bold" th:text="${store.storeId}"></td>
-                <td class="px-8 py-6 font-bold text-slate-800">
-                  <span class="store-address-text" th:text="${store.address}"></span>
-                  <div class="store-address-form hidden">
-                    <form action="/ameya/stores/editAddress" method="POST" class="flex items-center gap-2">
-                      <input type="hidden" name="storeId" th:value="${store.storeId}">
-                      <select name="addressId"
-                        class="bg-slate-50 border border-slate-200 text-xs rounded-lg p-2 w-48 focus:ring-2 focus:ring-rose-500 outline-none">
-                        <option th:each="addr : ${addresses}" th:value="${addr.addressId}"
-                          th:text="${addr.address + ', ' + addr.district}"
-                          th:selected="${addr.address == store.address}"></option>
-                      </select>
-                      <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-black text-[10px] uppercase tracking-widest transition">Save</button>
-                    </form>
-                  </div>
-                </td>
-                <td class="px-8 py-6 text-slate-500 font-medium uppercase tracking-tighter" th:text="${store.city}">
-                </td>
-                <td class="px-8 py-6 text-right flex justify-end items-center gap-3">
-                  <a th:href="@{/ameya/inventory(storeId=${store.storeId})}"
-                    class="text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white px-5 py-2 rounded-full hover:bg-rose-600 transition">Catalog</a>
-
-                  <!--              <button type="button" th:onclick="'confirmDelete(' + ${store.storeId} + ')'" class="text-slate-300 hover:text-red-600 transition">-->
-                  <!--                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>-->
-                  <!--              </button>-->
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <!-- Table -->
+    <div class="bg-black shadow-lg rounded-xl border border-gray-800 overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-800 text-left text-sm">
+        <thead class="bg-gray-900">
+          <tr>
+            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Sr.No</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Store Location</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Metropolis</th>
+            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Inventory</th>
+          </tr>
+        </thead>
+        <tbody class="bg-black divide-y divide-gray-800">
+          <tr th:each="store : ${stores}" class="hover:bg-gray-900 transition group">
+            <td class="px-6 py-4 font-mono font-bold text-netflix" th:text="${store.storeId}"></td>
+            <td class="px-6 py-4 font-bold text-white">
+              <span class="store-address-text" th:text="${store.address}"></span>
+              <div class="store-address-form hidden">
+                <form action="/ameya/stores/editAddress" method="POST" class="flex items-center gap-2">
+                  <input type="hidden" name="storeId" th:value="${store.storeId}">
+                  <!-- Re-styled the dropdown for dark mode! -->
+                  <select name="addressId"
+                    class="bg-gray-800 border border-gray-600 text-white text-xs rounded-lg p-2 w-48 focus:ring-2 focus:ring-netflix outline-none">
+                    <option th:each="addr : ${addresses}" th:value="${addr.addressId}"
+                      th:text="${addr.address + ', ' + addr.district}" th:selected="${addr.address == store.address}">
+                    </option>
+                  </select>
+                  <!-- Using our stylish yellow button for updates -->
+                  <button type="submit"
+                    class="bg-yellow-500 hover:bg-yellow-600 text-black px-3 py-2 rounded-lg font-bold text-xs transition">Save</button>
+                </form>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-gray-400 font-medium uppercase tracking-wider" th:text="${store.city}"></td>
+            <td class="px-6 py-4 text-right">
+              <a th:href="@{/ameya/inventory(storeId=${store.storeId})}"
+                class="inline-flex items-center px-4 py-2 border border-gray-700 text-gray-300 rounded text-xs font-bold hover:bg-white hover:text-black transition">Catalog</a>
+            </td>
+          </tr>
+          <tr th:if="${stores == null or stores.isEmpty()}">
+            <td colspan="4" class="px-6 py-12 text-center text-gray-500">No stores found matching your criteria.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <form id="deleteForm" th:action="@{/ameya/stores/delete}" method="POST" class="hidden">
-    <input type="hidden" name="storeId" id="deleteStoreId">
-  </form>
+  <!-- Footer -->
+  <footer class="py-8 text-center text-gray-500 border-t border-gray-800 mt-auto bg-black bg-opacity-80">
+    <p>&copy; 2026 FilmFlix Management System</p>
+  </footer>
 
   <script>
-    function confirmDelete(id) {
-      if (confirm("Permanently delete this store? All associated data will be archived.")) {
-        document.getElementById('deleteStoreId').value = id;
-        document.getElementById('deleteForm').submit();
-      }
-    }
-
     document.getElementById('toggleUpdateBtn').addEventListener('click', function () {
       document.querySelectorAll('.store-address-text').forEach(c => c.classList.toggle('hidden'));
       document.querySelectorAll('.store-address-form').forEach(c => c.classList.toggle('hidden'));
