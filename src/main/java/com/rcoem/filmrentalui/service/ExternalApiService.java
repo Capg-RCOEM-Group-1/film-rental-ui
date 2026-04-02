@@ -79,8 +79,6 @@ public class ExternalApiService {
         return restTemplate.getForObject(url, CustomerPageResponse.class);
     }
 
-
-    public List<CustomerAddressDTO> getAllAddresses() {
     public List<StoreDTO> getAllStores() {
         // Add the projection parameter to the URL!
         String url = this.baseUrl + "stores";
@@ -326,17 +324,6 @@ public void saveOrUpdateFilm(FilmDTO film, String selectedLanguageId) {
 
     //-------------------------------------------- Store Services ------------------------------------------------------
 
-    public List<StoreDTO> getAllStores() {
-        String url = this.baseUrl + "stores?projection=storeInfo";
-
-        try {
-            StoreListResponse response = restTemplate.getForObject(url, StoreListResponse.class);
-            return response != null && response.getEmbedded() != null ? response.getEmbedded().getStores() : null;
-        } catch (Exception e) {
-            System.err.println("Failed to fetch stores: " + e.getMessage());
-            return null;
-        }
-    }
 
     public List<StoreDTO> searchStores(String keyword, int page, int size) {
         // 1. Build the URL using fromUriString to avoid compilation errors

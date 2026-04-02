@@ -1,9 +1,0 @@
-com\rcoem\filmrentalui\dto\CustomerDTO.class
-com\rcoem\filmrentalui\service\ExternalApiService.class
-com\rcoem\filmrentalui\config\AppConfig.class
-com\rcoem\filmrentalui\FilmRentalUiApplication.class
-com\rcoem\filmrentalui\dto\PageData.class
-com\rcoem\filmrentalui\controllers\MainController.class
-com\rcoem\filmrentalui\dto\CustomerPageResponse.class
-com\rcoem\filmrentalui\dto\EmbeddedCustomers.class
-com\rcoem\filmrentalui\controllers\EkanshController.class
