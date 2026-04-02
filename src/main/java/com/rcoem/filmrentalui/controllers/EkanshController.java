@@ -107,4 +107,54 @@ public class EkanshController {
             return "redirect:/ekansh/customers";
         }
     }
+
+    @PostMapping("/customers/delete")
+    public String processDeleteCustomers(@RequestParam(value = "customerIds", required = false) java.util.List<String> customerIds,
+                                      RedirectAttributes redirectAttributes) {
+        if (customerIds == null || customerIds.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "No customers selected for deletion.");
+            return "redirect:/ekansh/customers";
+        }
+        
+        int count = 0;
+        boolean hasConflict = false;
+        for (String id : customerIds) {
+            try {
+                externalApiService.deleteCustomer(id);
+                count++;
+            } catch (org.springframework.web.client.HttpClientErrorException.Conflict e) {
+                logger.warn("Conflict deleting customer {}: they have active rentals or payments.", id);
+                hasConflict = true;
+            } catch (Exception e) {
+                logger.error("Failed to delete customer: " + id, e);
+            }
+        }
+        
+        if (count > 0) {
+            String msg = count + " customer(s) successfully deleted!";
+            if (hasConflict) {
+                msg += " However, some customers were skipped because they have existing rentals or payments.";
+            }
+            redirectAttributes.addFlashAttribute("successMessage", msg);
+        } else if (hasConflict) {
+            redirectAttributes.addFlashAttribute("error", "Cannot delete customer(s). They have existing rentals or payments in the system.");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Failed to delete selected customers.");
+        }
+        return "redirect:/ekansh/customers";
+    }
+
+    @GetMapping("/rentals")
+    public String rentalsPage() {
+        return "customerrentals";
+    }
+
+    @GetMapping(value = "/api/rentals", produces = org.springframework.http.MediaType.APPLICATION_JSON_VALUE)
+    @org.springframework.web.bind.annotation.ResponseBody
+    public String getRentalsProxy(
+            @RequestParam("customerId") String customerId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return externalApiService.getCustomerRentalsJson(customerId, page, size);
+    }
 }

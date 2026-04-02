@@ -1,41 +1,36 @@
 package com.rcoem.filmrentalui.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Map;
 
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StoreDTO {
-    private Short storeId; // Still needed for your Java logic
+    private Short storeId;
     private String address;
     private String city;
 
-    // Getters and Setters
-    public Short getStoreId() { return storeId; }
-    public void setStoreId(Short storeId) { this.storeId = storeId; }
-
-    @com.fasterxml.jackson.annotation.JsonProperty("_links")
-    public void unpackId(java.util.Map<String, Object> links) {
+    @JsonProperty("_links")
+    public void unpackId(Map<String, Object> links) {
         try {
-            java.util.Map<String, String> self = (java.util.Map<String, String>) links.get("store");
-            if (self == null) self = (java.util.Map<String, String>) links.get("self");
+            // Check for 'self' link which contains the ID in the URL
+            Map<String, String> self = (Map<String, String>) links.get("self");
             if (self != null) {
                 String href = self.get("href").replaceAll("\\{.*\\}", "");
                 String idStr = href.substring(href.lastIndexOf('/') + 1);
                 this.storeId = Short.parseShort(idStr);
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            // Fallback: If parsing fails, storeId remains null
+        }
     }
-
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
-
     public String getFullDisplay() {
-        return address != null ? (city != null ? address + ", " + city : address) : "";
+        if (address == null) return "";
+        return (city != null) ? address + ", " + city : address;
     }
 }
